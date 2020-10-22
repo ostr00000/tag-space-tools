@@ -2,23 +2,23 @@ import logging
 import shutil
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Union
 
-from tagspace_move.tag_space_entry import TagSpaceEntry
+from tag_space_tools.core.tag_space_entry import TagSpaceEntry
 
 logger = logging.getLogger(__name__)
 
 
 class TagSpaceSearch:
     """Files - normal files on disk,
-    Config files - special files from tagspace located in TAG_DIR.
+    Config files - special files from Tag Spaces located in TAG_DIR.
     """
 
     TAG_DIR = '.ts'
     TSM_FILE = 'tsm.json'
 
-    def __init__(self, location: Path, recursive=True):
-        self.location = location
+    def __init__(self, location: Union[Path, str], recursive=True):
+        self.location = Path(location)
         self.recursive = recursive
 
         self.missingTagFiles: Dict[str, List[TagSpaceEntry]] = defaultdict(list)
@@ -52,9 +52,9 @@ class TagSpaceSearch:
 
                 else:
                     files = '\n'.join(str(c.configFile) for c in configs)
-                    logger.warning(f"There are more than one matching file: [\n{files}\n]")
+                    logger.error(f"There are more than one matching file: [\n{files}\n]")
             else:
-                logger.error(f"Cannot find config for file '{missingTagFileName}'")
+                logger.warning(f"Cannot find config for file '{missingTagFileName}'")
 
     def _findTagSpace(self, location: Path):
         """Find all files and config that do not have corresponding files"""
@@ -100,5 +100,3 @@ class TagSpaceSearch:
             if file.suffix.endswith('json'):
                 if file.name != self.TSM_FILE:
                     yield file
-
-

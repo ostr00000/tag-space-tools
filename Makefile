@@ -1,4 +1,4 @@
-MAIN_PACKAGE_NAME=tag_space-move
+MAIN_PACKAGE_NAME=tag_space_tools
 
 UIC=pyuic5
 RCC=pyrcc5

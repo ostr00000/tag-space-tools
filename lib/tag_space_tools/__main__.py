@@ -2,7 +2,7 @@ import logging
 import sys
 from pathlib import Path
 
-from tagspace_move.fix_tagspace import TagSpaceSearch
+from tag_space_tools.core.fix_tagspace import TagSpaceSearch
 
 logger = logging.getLogger(__name__)
 

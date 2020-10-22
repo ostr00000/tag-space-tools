@@ -1,0 +1,1 @@
+tagSpaceCoreName = __name__
