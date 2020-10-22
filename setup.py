@@ -8,6 +8,7 @@ setup(
     packages=find_packages(exclude=("*test*",)),
     entry_points={'console_scripts': [
         'fix-tag-space = tag_space_tools.__main__:main',
+        'tag-space-tools = tag_space_tools.gui.__main__:main',
     ]},
     package_dir={"": "lib"},
     extras_require={'gui': ['PyQt5']},
