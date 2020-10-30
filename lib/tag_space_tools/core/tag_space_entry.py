@@ -1,6 +1,28 @@
+import json
 from dataclasses import dataclass
+from functools import cached_property
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
+
+
+@dataclass
+class Tag:
+    title: str
+    type: str
+    color: str
+    textcolor: str
+
+    def __eq__(self, other):
+        if isinstance(other, str):
+            return other == self.title
+
+        if not isinstance(other, Tag):
+            raise NotImplemented
+
+        return self.title == other.title
+
+    def __hash__(self):
+        return hash(self.title)
 
 
 @dataclass
@@ -15,3 +37,14 @@ class TagSpaceEntry:
     def isValid(self):
         return (self.file is not None
                 and self.configFile is not None)
+
+    @cached_property
+    def tags(self) -> List[Tag]:
+        with open(self.configFile, encoding='utf-8-sig') as cf:
+            configJson = json.load(cf)
+
+        try:
+            tags = [Tag(**tagJson) for tagJson in configJson['tags']]
+            return tags
+        except KeyError:
+            return []

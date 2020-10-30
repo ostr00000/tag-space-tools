@@ -23,6 +23,7 @@ class TagSpaceSearch:
 
         self.missingTagFiles: Dict[str, List[TagSpaceEntry]] = defaultdict(list)
         self.missingTagConfigs: Dict[str, List[TagSpaceEntry]] = defaultdict(list)
+        self.validTagEntries: List[TagSpaceEntry] = []
         self._findTagSpace(self.location)
         self.missingTagFiles = dict(self.missingTagFiles)
         self.missingTagConfigs = dict(self.missingTagConfigs)
@@ -82,6 +83,7 @@ class TagSpaceSearch:
     def _addEntry(self, tse: TagSpaceEntry):
         """Add an entry to missing list if the entry is invalid"""
         if tse.isValid():
+            self.validTagEntries.append(tse)
             return
 
         if tse.file is None and tse.configFile is not None:
