@@ -1,3 +1,4 @@
+import inspect
 import json
 from dataclasses import dataclass
 from functools import cached_property
@@ -11,6 +12,14 @@ class Tag:
     type: str
     color: str
     textcolor: str
+
+    @classmethod
+    def fromDict(cls, env):
+        param = inspect.signature(cls).parameters
+        tag = cls(**{
+            k: v for k, v in env.items()
+            if k in param})
+        return tag
 
     def __eq__(self, other):
         if isinstance(other, str):
@@ -44,7 +53,7 @@ class TagSpaceEntry:
             configJson = json.load(cf)
 
         try:
-            tags = [Tag(**tagJson) for tagJson in configJson['tags']]
+            tags = [Tag.fromDict(tagJson) for tagJson in configJson['tags']]
             return tags
         except KeyError:
             return []

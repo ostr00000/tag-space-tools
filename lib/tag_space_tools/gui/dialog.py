@@ -7,7 +7,7 @@ from PyQt5.QtGui import QStandardItemModel
 from PyQt5.QtWidgets import QDialog, QFileDialog, QApplication
 
 from pyqt_utils.decorators import cursorDec
-from pyqt_utils.slot_decorator_meta import SlotDecoratorMeta
+from pyqt_utils.metaclass.slot_decorator import SlotDecoratorMeta
 from tag_space_tools.core import tagSpaceCoreName
 from tag_space_tools.core.fix_tagspace import TagSpaceSearch
 from tag_space_tools.gui.exceptions import EmptyTagSpaceDirException
