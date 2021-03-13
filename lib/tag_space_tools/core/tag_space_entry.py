@@ -9,9 +9,9 @@ from typing import Optional, List
 @dataclass
 class Tag:
     title: str
-    type: str
-    color: str
-    textcolor: str
+    type: str = ''
+    color: str = ''
+    textcolor: str = ''
 
     @classmethod
     def fromDict(cls, env):
@@ -20,6 +20,9 @@ class Tag:
             k: v for k, v in env.items()
             if k in param})
         return tag
+
+    def toJson(self):
+        return json.dumps(self.__dict__)
 
     def __eq__(self, other):
         if isinstance(other, str):

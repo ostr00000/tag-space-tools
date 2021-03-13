@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'src/ui/dialog.ui'
+# Form implementation generated from reading ui file 'src/ui/fix_widget.ui'
 #
 # Created by: PyQt5 UI code generator 5.14.2
 #
@@ -10,22 +10,23 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_TagSpaceTool(object):
-    def setupUi(self, TagSpaceTool):
-        TagSpaceTool.setObjectName("TagSpaceTool")
-        TagSpaceTool.resize(1174, 733)
+class Ui_TagSpaceFixWidget(object):
+    def setupUi(self, TagSpaceFixWidget):
+        TagSpaceFixWidget.setObjectName("TagSpaceFixWidget")
+        TagSpaceFixWidget.resize(1174, 733)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/icons/icons/main.jpg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        TagSpaceTool.setWindowIcon(icon)
-        self.verticalLayout_3 = QtWidgets.QVBoxLayout(TagSpaceTool)
+        TagSpaceFixWidget.setWindowIcon(icon)
+        self.verticalLayout_3 = QtWidgets.QVBoxLayout(TagSpaceFixWidget)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
-        self.fixButton = QtWidgets.QPushButton(TagSpaceTool)
+        self.fixButton = QtWidgets.QPushButton(TagSpaceFixWidget)
         self.fixButton.setObjectName("fixButton")
         self.horizontalLayout.addWidget(self.fixButton)
-        self.advancedMode = QtWidgets.QCheckBox(TagSpaceTool)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Fixed)
+        self.advancedMode = QtWidgets.QCheckBox(TagSpaceFixWidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Maximum,
+                                           QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.advancedMode.sizePolicy().hasHeightForWidth())
@@ -34,12 +35,13 @@ class Ui_TagSpaceTool(object):
         self.advancedMode.setTristate(True)
         self.advancedMode.setObjectName("advancedMode")
         self.horizontalLayout.addWidget(self.advancedMode)
-        self.resetButton = QtWidgets.QToolButton(TagSpaceTool)
+        self.resetButton = QtWidgets.QToolButton(TagSpaceFixWidget)
         self.resetButton.setObjectName("resetButton")
         self.horizontalLayout.addWidget(self.resetButton)
         self.verticalLayout_3.addLayout(self.horizontalLayout)
-        self.splitter = QtWidgets.QSplitter(TagSpaceTool)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.splitter = QtWidgets.QSplitter(TagSpaceFixWidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
+                                           QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.splitter.sizePolicy().hasHeightForWidth())
@@ -86,20 +88,19 @@ class Ui_TagSpaceTool(object):
         self.verticalLayout_2.addWidget(self.treeView)
         self.verticalLayout_3.addWidget(self.splitter)
 
-        self.retranslateUi(TagSpaceTool)
+        self.retranslateUi(TagSpaceFixWidget)
         self.expandButton.clicked.connect(self.treeView.expandAll)
         self.colapseButton.clicked.connect(self.treeView.collapseAll)
-        QtCore.QMetaObject.connectSlotsByName(TagSpaceTool)
+        QtCore.QMetaObject.connectSlotsByName(TagSpaceFixWidget)
 
-    def retranslateUi(self, TagSpaceTool):
+    def retranslateUi(self, TagSpaceFixWidget):
         _translate = QtCore.QCoreApplication.translate
-        TagSpaceTool.setWindowTitle(_translate("TagSpaceTool", "Tag space tool"))
-        self.fixButton.setText(_translate("TagSpaceTool", "Fix tags"))
-        self.advancedMode.setText(_translate("TagSpaceTool", "Advanced mode"))
-        self.resetButton.setText(_translate("TagSpaceTool", "Clean last path"))
-        self.groupTextEdit.setTitle(_translate("TagSpaceTool", "Logs:"))
-        self.groupTreeView.setTitle(_translate("TagSpaceTool", "Grouped:"))
-        self.label.setText(_translate("TagSpaceTool", "Filter:"))
-        self.expandButton.setText(_translate("TagSpaceTool", "<||>"))
-        self.colapseButton.setText(_translate("TagSpaceTool", "|><|"))
-from . import resources_rc
+        TagSpaceFixWidget.setWindowTitle(_translate("TagSpaceFixWidget", "Tag space tool"))
+        self.fixButton.setText(_translate("TagSpaceFixWidget", "Fix tags"))
+        self.advancedMode.setText(_translate("TagSpaceFixWidget", "Advanced mode"))
+        self.resetButton.setText(_translate("TagSpaceFixWidget", "Clean last path"))
+        self.groupTextEdit.setTitle(_translate("TagSpaceFixWidget", "Logs:"))
+        self.groupTreeView.setTitle(_translate("TagSpaceFixWidget", "Grouped:"))
+        self.label.setText(_translate("TagSpaceFixWidget", "Filter:"))
+        self.expandButton.setText(_translate("TagSpaceFixWidget", "<||>"))
+        self.colapseButton.setText(_translate("TagSpaceFixWidget", "|><|"))

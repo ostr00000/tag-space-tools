@@ -13,7 +13,7 @@ from tag_space_tools.core.fix_tagspace import TagSpaceSearch
 from tag_space_tools.gui.exceptions import EmptyTagSpaceDirException
 from tag_space_tools.gui.settings import settings
 from tag_space_tools.gui.text_handler import TextEditHandler
-from tag_space_tools.ui.ui_dialog import Ui_TagSpaceTool
+from tag_space_tools.ui.ui_fix_widget import Ui_TagSpaceFixWidget
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ def useHandler(loggerName: str, handler: TextEditHandler):
     tagLogger.removeHandler(handler)
 
 
-class FixDialog(QDialog, Ui_TagSpaceTool, metaclass=SlotDecoratorMeta):
+class FixDialog(QDialog, Ui_TagSpaceFixWidget, metaclass=SlotDecoratorMeta):
     def __init__(self, parent=None):
         super(FixDialog, self).__init__(parent=parent)
         self.setupUi(self)
