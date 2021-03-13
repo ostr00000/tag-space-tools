@@ -1,12 +1,13 @@
 import logging
 import shutil
 from pathlib import Path
-from typing import Iterator, Union
+from typing import Iterator, Union, Optional, Iterable, TypeVar, Tuple
 
 from tag_space_tools.core.fix_tagspace import TagSpaceSearch
 from tag_space_tools.core.tag_space_entry import Tag, TagSpaceEntry
 
 logger = logging.getLogger(__name__)
+T = TypeVar('T')
 
 
 def _dirGen(sortTag: list[Tag], tags: list[Tag], destDir: Path) -> Iterator[Path]:
@@ -15,6 +16,19 @@ def _dirGen(sortTag: list[Tag], tags: list[Tag], destDir: Path) -> Iterator[Path
         if st in tags:
             curPath = curPath / st.title
             yield curPath
+
+
+def _nextVlGen(gen: Iterable[T]) -> Iterator[Tuple[T, Optional[T]]]:
+    it = iter(gen)
+    try:
+        val = next(it)
+    except StopIteration:
+        return
+
+    for nextVal in it:
+        yield val, nextVal
+        val = nextVal
+    yield val, None
 
 
 def _filesInFolderCount(folder: Path):
@@ -43,7 +57,11 @@ def sortFiles(sortTag: list[Tag],
     for tagEntry in tagSpaceSearch.validTagEntries:
 
         lastDir = destDir
-        for lastDir in _dirGen(sortTag, tagEntry.tags, destDir):
+        dirGen = _dirGen(sortTag, tagEntry.tags, destDir)
+        for lastDir, nextDir in _nextVlGen(dirGen):
+            if nextDir and nextDir.exists():
+                continue
+
             if _filesInFolderCount(lastDir) <= maxFilesInDir:
                 _moveTagEntry(tagEntry, lastDir)
                 break

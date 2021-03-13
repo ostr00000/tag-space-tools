@@ -4,10 +4,11 @@ from contextlib import contextmanager
 
 from PyQt5.QtCore import Qt, QSortFilterProxyModel
 from PyQt5.QtGui import QStandardItemModel
-from PyQt5.QtWidgets import QDialog, QFileDialog, QApplication
+from PyQt5.QtWidgets import QFileDialog, QApplication, QWidget
 
 from pyqt_utils.decorators import cursorDec
 from pyqt_utils.metaclass.slot_decorator import SlotDecoratorMeta
+from pyqt_utils.ui_base_widget import BaseWidget
 from tag_space_tools.core import tagSpaceCoreName
 from tag_space_tools.core.fix_tagspace import TagSpaceSearch
 from tag_space_tools.gui.exceptions import EmptyTagSpaceDirException
@@ -27,11 +28,10 @@ def useHandler(loggerName: str, handler: TextEditHandler):
     tagLogger.removeHandler(handler)
 
 
-class FixDialog(QDialog, Ui_TagSpaceFixWidget, metaclass=SlotDecoratorMeta):
-    def __init__(self, parent=None):
-        super(FixDialog, self).__init__(parent=parent)
-        self.setupUi(self)
-        self.retranslateUi(self)
+class FixMissingTagWidget(Ui_TagSpaceFixWidget, BaseWidget, QWidget, metaclass=SlotDecoratorMeta):
+
+    def __post_init__(self, *args, **kwargs):
+        super().__post_init__(*args, **kwargs)
 
         self.model = QStandardItemModel(self.treeView)
         self.filterModel = QSortFilterProxyModel(self.treeView)
