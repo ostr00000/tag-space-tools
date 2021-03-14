@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Iterable
 
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtGui import QColor
+from PyQt5.QtGui import QColor, QDropEvent
 from PyQt5.QtWidgets import QListWidgetItem, QListWidget
 
 from tag_space_tools.core.tag_space_entry import Tag
@@ -57,3 +57,8 @@ class TagListWidget(QListWidget):
             serialized = json.dumps(
                 self.getSortTags(), default=lambda x: x.__dict__)
             saveFile.write(serialized)
+
+    def dropEvent(self, event: QDropEvent):
+        super().dropEvent(event)
+        if event.isAccepted():
+            self.dataChanged.emit()

@@ -56,7 +56,8 @@
          </property>
          <property name="icon">
           <iconset theme="document-open">
-           <normaloff>.</normaloff>.</iconset>
+           <normaloff>.</normaloff>.
+          </iconset>
          </property>
          <property name="toolButtonStyle">
           <enum>Qt::ToolButtonTextBesideIcon</enum>
@@ -70,7 +71,8 @@
          </property>
          <property name="icon">
           <iconset theme="document-save-as">
-           <normaloff>.</normaloff>.</iconset>
+           <normaloff>.</normaloff>.
+          </iconset>
          </property>
         </widget>
        </item>
@@ -81,7 +83,8 @@
          </property>
          <property name="icon">
           <iconset theme="list-remove">
-           <normaloff>.</normaloff>.</iconset>
+           <normaloff>.</normaloff>.
+          </iconset>
          </property>
         </widget>
        </item>
@@ -186,7 +189,7 @@
   <customwidget>
    <class>TagListWidget</class>
    <extends>QListWidget</extends>
-   <header>tag_space_tools.gui.tag_sorter.list_widget</header>
+   <header>tag_space_tools.gui.tag_sorter_widget</header>
   </customwidget>
  </customwidgets>
  <resources/>
