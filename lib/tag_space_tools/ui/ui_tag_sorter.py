@@ -52,7 +52,7 @@ class Ui_TagSorter(object):
         self.removeTagButton.setObjectName("removeTagButton")
         self.horizontalLayout.addWidget(self.removeTagButton)
         self.gridLayout.addLayout(self.horizontalLayout, 0, 0, 1, 1)
-        self.listWidget = QtWidgets.QListWidget(TagSorter)
+        self.listWidget = TagListWidget(TagSorter)
         self.listWidget.setDragDropMode(QtWidgets.QAbstractItemView.DragDrop)
         self.listWidget.setDefaultDropAction(QtCore.Qt.MoveAction)
         self.listWidget.setSelectionMode(QtWidgets.QAbstractItemView.ContiguousSelection)
@@ -114,3 +114,6 @@ class Ui_TagSorter(object):
         self.label_3.setText(_translate("TagSorter", "From folder:"))
         self.fromButton.setText(_translate("TagSorter", "..."))
         self.moveFilesButton.setText(_translate("TagSorter", "Move files"))
+
+
+from tag_space_tools.gui.tag_sorter.list_widget import TagListWidget

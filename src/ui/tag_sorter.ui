@@ -55,7 +55,8 @@
           <string>Load tag library</string>
          </property>
          <property name="icon">
-          <iconset theme="document-open"/>
+          <iconset theme="document-open">
+           <normaloff>.</normaloff>.</iconset>
          </property>
          <property name="toolButtonStyle">
           <enum>Qt::ToolButtonTextBesideIcon</enum>
@@ -68,7 +69,8 @@
           <string>...</string>
          </property>
          <property name="icon">
-          <iconset theme="document-save-as"/>
+          <iconset theme="document-save-as">
+           <normaloff>.</normaloff>.</iconset>
          </property>
         </widget>
        </item>
@@ -78,14 +80,15 @@
           <string>Remove</string>
          </property>
          <property name="icon">
-          <iconset theme="list-remove"/>
+          <iconset theme="list-remove">
+           <normaloff>.</normaloff>.</iconset>
          </property>
         </widget>
        </item>
       </layout>
      </item>
      <item row="1" column="0">
-      <widget class="QListWidget" name="listWidget">
+      <widget class="TagListWidget" name="listWidget">
        <property name="dragDropMode">
         <enum>QAbstractItemView::DragDrop</enum>
        </property>
@@ -179,6 +182,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>TagListWidget</class>
+   <extends>QListWidget</extends>
+   <header>tag_space_tools.gui.tag_sorter.list_widget</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

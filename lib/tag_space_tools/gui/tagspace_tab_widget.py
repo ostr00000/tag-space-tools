@@ -4,7 +4,7 @@ from pyqt_utils.metaclass.geometry_saver import GeometrySaverMeta
 from pyqt_utils.ui_base_widget import BaseWidget
 from tag_space_tools.gui.fix_missing_tag_widget import FixMissingTagWidget
 from tag_space_tools.gui.settings import settings
-from tag_space_tools.gui.tag_sorter_widget import TagSorter
+from tag_space_tools.gui.tag_sorter.widget import TagSorter
 
 
 class TagSpaceTabWidget(BaseWidget, QTabWidget, settings=settings,
