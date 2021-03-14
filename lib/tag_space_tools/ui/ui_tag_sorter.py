@@ -7,7 +7,7 @@
 # WARNING! All changes made in this file will be lost!
 
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 
 class Ui_TagSorter(object):
@@ -24,7 +24,7 @@ class Ui_TagSorter(object):
         self.maxFilesPerLevelSpinBox = QtWidgets.QSpinBox(TagSorter)
         self.maxFilesPerLevelSpinBox.setMinimum(1)
         self.maxFilesPerLevelSpinBox.setMaximum(10000)
-        self.maxFilesPerLevelSpinBox.setProperty("value", 1)
+        self.maxFilesPerLevelSpinBox.setProperty("value", 20)
         self.maxFilesPerLevelSpinBox.setObjectName("maxFilesPerLevelSpinBox")
         self.verticalLayout.addWidget(self.maxFilesPerLevelSpinBox)
         self.gridLayout_2.addLayout(self.verticalLayout, 0, 2, 1, 1)
@@ -36,9 +36,19 @@ class Ui_TagSorter(object):
         self.label.setObjectName("label")
         self.horizontalLayout.addWidget(self.label)
         self.loadTagsButton = QtWidgets.QToolButton(TagSorter)
+        icon = QtGui.QIcon.fromTheme("document-open")
+        self.loadTagsButton.setIcon(icon)
+        self.loadTagsButton.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
         self.loadTagsButton.setObjectName("loadTagsButton")
         self.horizontalLayout.addWidget(self.loadTagsButton)
+        self.saveButton = QtWidgets.QToolButton(TagSorter)
+        icon = QtGui.QIcon.fromTheme("document-save-as")
+        self.saveButton.setIcon(icon)
+        self.saveButton.setObjectName("saveButton")
+        self.horizontalLayout.addWidget(self.saveButton)
         self.removeTagButton = QtWidgets.QToolButton(TagSorter)
+        icon = QtGui.QIcon.fromTheme("list-remove")
+        self.removeTagButton.setIcon(icon)
         self.removeTagButton.setObjectName("removeTagButton")
         self.horizontalLayout.addWidget(self.removeTagButton)
         self.gridLayout.addLayout(self.horizontalLayout, 0, 0, 1, 1)
@@ -97,6 +107,7 @@ class Ui_TagSorter(object):
         self.label_2.setText(_translate("TagSorter", "Max files per level:"))
         self.label.setText(_translate("TagSorter", "Tag order:"))
         self.loadTagsButton.setText(_translate("TagSorter", "Load tag library"))
+        self.saveButton.setText(_translate("TagSorter", "..."))
         self.removeTagButton.setText(_translate("TagSorter", "Remove"))
         self.label_4.setText(_translate("TagSorter", "To folder:"))
         self.toButton.setText(_translate("TagSorter", "..."))

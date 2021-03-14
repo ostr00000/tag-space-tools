@@ -7,6 +7,7 @@ from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QFileDialog, QListWidgetItem, QWidget
 
 from pyqt_utils.metaclass.slot_decorator import SlotDecoratorMeta
+from pyqt_utils.python.json_serializable import deepMap
 from pyqt_utils.ui_base_widget import BaseWidget
 from tag_space_tools.core.sort_files import sortFiles
 from tag_space_tools.core.tag_space_entry import Tag
@@ -17,14 +18,11 @@ logger = logging.getLogger(__name__)
 
 
 class TagItem(QListWidgetItem):
-    @classmethod
-    def fromDict(cls, env, parent=None):
-        tag = Tag.fromDict(env)
-        tagItem = TagItem(tag.title, parent=parent)
-        tagItem.tag = tag
-        tagItem.setBackground(cls._convertColor(tag.color))
-        tagItem.setForeground(cls._convertColor(tag.textcolor))
-        return tagItem
+    def __init__(self, tag: Tag, parent=None):
+        super().__init__(tag.title, parent=parent)
+        self.tag = tag
+        self.setBackground(self._convertColor(tag.color))
+        self.setForeground(self._convertColor(tag.textcolor))
 
     @staticmethod
     def _convertColor(color: str) -> QColor:
@@ -44,21 +42,20 @@ class TagSorter(Ui_TagSorter, BaseWidget, QWidget, metaclass=SlotDecoratorMeta):
         self.maxFilesPerLevelSpinBox.valueChanged.connect(self.onMaxFilesChanged)
         self.removeTagButton.clicked.connect(self.onRemoveTagClicked)
         self.moveFilesButton.clicked.connect(self.onMoveFilesClicked)
+        self.saveButton.clicked.connect(self.onSaveButtonClicked)
 
         self.maxFilesPerLevelSpinBox.setValue(settings.MAX_FILES_PER_LEVEL)
         self.toLineEdit.setText(settings.TO_PATH)
         self.fromLineEdit.setText(settings.FROM_PATH)
 
+        settings.SORTED_TAGS = []
         if sortedTags := settings.SORTED_TAGS:
-            self._loadLastSortedTags(sortedTags)
-        else:
-            self._loadTagLibrary(settings.LIBRARY_PATH)
+            self._loadTags(sortedTags)
 
-    def _loadLastSortedTags(self, sortedTags: Iterable[dict]):
+    def _loadTags(self, sortedTags: Iterable[Tag]):
         self.listWidget.clear()
         for tag in sortedTags:
-            tagItem = TagItem.fromDict(tag)
-            self.listWidget.addItem(tagItem)
+            self.listWidget.addItem(TagItem(tag))
 
     def onLoadTagsButton(self):
         path, ext = QFileDialog.getOpenFileName(
@@ -76,13 +73,23 @@ class TagSorter(Ui_TagSorter, BaseWidget, QWidget, metaclass=SlotDecoratorMeta):
         with open(path, 'r') as tagLibraryFile:
             tagLibrary = json.load(tagLibraryFile)
 
-        self._loadLastSortedTags(self._parseTagLibraryJson(tagLibrary))
+        self._loadTags(self._parseJson(tagLibrary))
+
+    def _parseJson(self, tagJson) -> Iterator[Tag]:
+        if 'tagGroups' in tagJson:
+            yield from self._parseTagLibraryJson(tagJson)
+        else:
+            yield from self._parseTagToolsJson(tagJson)
 
     @staticmethod
-    def _parseTagLibraryJson(tagJson: dict) -> Iterator[dict]:
+    def _parseTagLibraryJson(tagJson: dict) -> Iterator[Tag]:
         for group in tagJson['tagGroups']:
             for tag in group['children']:
-                yield tag
+                yield Tag.fromDict(tag)
+
+    @staticmethod
+    def _parseTagToolsJson(tagJson: list) -> Iterator[Tag]:
+        yield from deepMap(tagJson, (list, Tag.fromDict))
 
     def onRemoveTagClicked(self):
         for item in reversed(self.listWidget.selectedItems()):
@@ -91,13 +98,14 @@ class TagSorter(Ui_TagSorter, BaseWidget, QWidget, metaclass=SlotDecoratorMeta):
         self._saveSortedTags()
 
     def _saveSortedTags(self):
-        saveList = []
+        settings.SORTED_TAGS = self.getSortTags()
+
+    def getSortTags(self) -> list[Tag]:
+        sortTags = []
         for i in range(self.listWidget.count()):
             item = self.listWidget.item(i)
-            tag: Tag = getattr(item, 'tag')
-            saveList.append(tag.toJson())
-
-        settings.SORTED_TAGS = saveList
+            sortTags.append(getattr(item, 'tag'))
+        return sortTags
 
     def onFromButtonClicked(self):
         path = QFileDialog.getExistingDirectory(
@@ -135,9 +143,19 @@ class TagSorter(Ui_TagSorter, BaseWidget, QWidget, metaclass=SlotDecoratorMeta):
         maxFiles = self.maxFilesPerLevelSpinBox.value()
         sortFiles(sortTags, fromPath, toPath, maxFiles)
 
-    def getSortTags(self) -> list[Tag]:
-        sortTags = []
-        for i in range(self.listWidget.count()):
-            item = self.listWidget.item(i)
-            sortTags.append(getattr(item, 'tag'))
-        return sortTags
+    def onSaveButtonClicked(self):
+        savePath: str
+        savePath, ext = QFileDialog.getSaveFileName(
+            parent=self, caption="Select save location",
+            directory=settings.LAST_SAVE_FILE, filter='*.json')
+        if not savePath:
+            return
+
+        if not savePath.endswith('.json'):
+            savePath += '.json'
+
+        settings.LAST_SAVE_FILE = savePath
+        Path(savePath).parent.mkdir(parents=True, exist_ok=True)
+
+        with open(savePath, 'w') as saveFile:
+            saveFile.write(json.dumps(self.getSortTags(), default=lambda x: x.__dict__))

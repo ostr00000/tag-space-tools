@@ -21,9 +21,6 @@ class Tag:
             if k in param})
         return tag
 
-    def toJson(self):
-        return json.dumps(self.__dict__)
-
     def __eq__(self, other):
         if isinstance(other, str):
             return other == self.title
