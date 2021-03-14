@@ -2,12 +2,12 @@ from pathlib import Path
 from typing import List, Iterable, Union
 
 from tag_space_tools import modulePath
-from tag_space_tools.core.fix_tagspace import TagSpaceSearch
+from tag_space_tools.core.file_searcher import TagSpaceSearcher
 
 
 class TagFinder:
     def __init__(self, path: Union[Path, str]):
-        self.tss = TagSpaceSearch(path)
+        self.tss = TagSpaceSearcher(path)
 
     def findAllTags(self) -> List[str]:
         tags = set()

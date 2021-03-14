@@ -9,13 +9,10 @@ from tag_space_tools.core.tag_space_entry import TagSpaceEntry
 logger = logging.getLogger(__name__)
 
 
-class TagSpaceSearch:
+class TagSpaceSearcher:
     """Files - normal files on disk,
-    Config files - special files from Tag Spaces located in TAG_DIR.
+    Config files - special files from Tag Spaces located in TagSpaceEntry.TAG_DIR.
     """
-
-    TAG_DIR = '.ts'
-    TSM_FILE = 'tsm.json'
 
     def __init__(self, location: Union[Path, str], recursive=True):
         self.location = Path(location)
@@ -24,6 +21,7 @@ class TagSpaceSearch:
         self.missingTagFiles: Dict[str, List[TagSpaceEntry]] = defaultdict(list)
         self.missingTagConfigs: Dict[str, List[TagSpaceEntry]] = defaultdict(list)
         self.validTagEntries: List[TagSpaceEntry] = []
+
         self._findTagSpace(self.location)
         self.missingTagFiles = dict(self.missingTagFiles)
         self.missingTagConfigs = dict(self.missingTagConfigs)
@@ -40,7 +38,7 @@ class TagSpaceSearch:
             if configs := self.missingTagConfigs.get(missingTagFileName):
                 if len(configs) == 1:
                     configTag = configs[0].configFile
-                    targetPath = missingTagFile.file.parent / self.TAG_DIR / configTag.name
+                    targetPath = missingTagFile.file.parent / TagSpaceEntry.TAG_DIR / configTag.name
 
                     if targetPath.exists():
                         logger.error(f'File already exists {targetPath}')
@@ -59,12 +57,12 @@ class TagSpaceSearch:
 
     def _findTagSpace(self, location: Path):
         """Find all files and config that do not have corresponding files"""
-        tagDir = location / self.TAG_DIR
+        tagDir = location / TagSpaceEntry.TAG_DIR
         metaFiles = set(self._findMetaFiles(tagDir))
 
         for file in location.iterdir():
             if file.is_dir():
-                if file.name == self.TAG_DIR:
+                if file.name == TagSpaceEntry.TAG_DIR:
                     continue
                 elif self.recursive:
                     self._findTagSpace(file)
@@ -93,12 +91,13 @@ class TagSpaceSearch:
         elif tse.file is not None and tse.configFile is None:
             self.missingTagFiles[tse.file.name].append(tse)
 
-    def _findMetaFiles(self, folder: Path):
+    @staticmethod
+    def _findMetaFiles(folder: Path):
         """Find config for files in 'folder'."""
         if not folder.exists():
             return
 
         for file in folder.iterdir():
             if file.suffix.endswith('json'):
-                if file.name != self.TSM_FILE:
+                if file.name != TagSpaceEntry.TSM_FILE:
                     yield file

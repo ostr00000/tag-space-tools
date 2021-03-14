@@ -114,6 +114,4 @@ class Ui_TagSorter(object):
         self.label_3.setText(_translate("TagSorter", "From folder:"))
         self.fromButton.setText(_translate("TagSorter", "..."))
         self.moveFilesButton.setText(_translate("TagSorter", "Move files"))
-
-
 from tag_space_tools.gui.tag_sorter.list_widget import TagListWidget

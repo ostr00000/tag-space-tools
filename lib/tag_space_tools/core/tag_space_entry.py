@@ -1,9 +1,13 @@
 import inspect
 import json
+import logging
+import shutil
 from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional, List, ClassVar
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -36,6 +40,9 @@ class Tag:
 
 @dataclass
 class TagSpaceEntry:
+    TAG_DIR: ClassVar = '.ts'
+    TSM_FILE: ClassVar = 'tsm.json'
+
     file: Optional[Path] = None
     configFile: Optional[Path] = None
 
@@ -57,3 +64,16 @@ class TagSpaceEntry:
             return tags
         except KeyError:
             return []
+
+    def move(self, destDir: Path):
+        metaDir = destDir / self.TAG_DIR
+        metaDir.mkdir(exist_ok=True, parents=True)
+
+        destFile = destDir / self.file.name
+        logger.debug(f"Moving {self.file} to {destFile}")
+        shutil.move(self.file, destFile)
+        self.file = destFile
+
+        destFile = metaDir / self.configFile.name
+        shutil.move(self.configFile, destFile)
+        self.configFile = destFile
