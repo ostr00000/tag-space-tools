@@ -91,8 +91,7 @@ class Ui_TagSorter(object):
         self.horizontalLayout_2.addWidget(self.fromButton)
         self.verticalLayout_3.addLayout(self.horizontalLayout_2)
         self.gridLayout_2.addLayout(self.verticalLayout_3, 1, 2, 1, 1)
-        spacerItem = QtWidgets.QSpacerItem(20, 294, QtWidgets.QSizePolicy.Minimum,
-                                           QtWidgets.QSizePolicy.Expanding)
+        spacerItem = QtWidgets.QSpacerItem(20, 294, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.gridLayout_2.addItem(spacerItem, 4, 2, 1, 1)
         self.moveFilesButton = QtWidgets.QPushButton(TagSorter)
         self.moveFilesButton.setObjectName("moveFilesButton")
@@ -114,4 +113,4 @@ class Ui_TagSorter(object):
         self.label_3.setText(_translate("TagSorter", "From folder:"))
         self.fromButton.setText(_translate("TagSorter", "..."))
         self.moveFilesButton.setText(_translate("TagSorter", "Move files"))
-from tag_space_tools.gui.tag_sorter.list_widget import TagListWidget
+from tag_space_tools.gui.tag_sorter_widget import TagListWidget
