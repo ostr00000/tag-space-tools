@@ -189,7 +189,7 @@
   <customwidget>
    <class>TagListWidget</class>
    <extends>QListWidget</extends>
-   <header>tag_space_tools.gui.tag_sorter_widget</header>
+   <header>tag_space_tools.gui.tag_sorter.list_widget</header>
   </customwidget>
  </customwidgets>
  <resources/>
