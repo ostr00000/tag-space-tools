@@ -1,12 +1,14 @@
 import logging
+from itertools import chain
 from pathlib import Path
-from typing import Iterator, Union, Optional, Iterable, TypeVar, Tuple, Container
+from typing import Iterator, Union, Container
+
+import more_itertools
 
 from tag_space_tools.core.tag_file_mapper import TagFileMapper
 from tag_space_tools.core.tag_space_entry import Tag
 
 logger = logging.getLogger(__name__)
-T = TypeVar('T')
 
 
 def _dirGen(sortTag: list[Tag], tags: list[Tag], destDir: Path) -> Iterator[Path]:
@@ -15,19 +17,6 @@ def _dirGen(sortTag: list[Tag], tags: list[Tag], destDir: Path) -> Iterator[Path
         if st in tags:
             curPath = curPath / st.title
             yield curPath
-
-
-def _nextValueGen(gen: Iterable[T]) -> Iterator[Tuple[T, Optional[T]]]:
-    it = iter(gen)
-    try:
-        val = next(it)
-    except StopIteration:
-        return
-
-    for nextVal in it:
-        yield val, nextVal
-        val = nextVal
-    yield val, None
 
 
 def sortFiles(sortTag: list[Tag],
@@ -49,7 +38,7 @@ def sortFiles(sortTag: list[Tag],
 
         lastDir = destDir
         dirGen = _dirGen(sortTag, tagEntry.tags, destDir)
-        for lastDir, nextDir in _nextValueGen(dirGen):
+        for lastDir, nextDir in more_itertools.windowed(chain(dirGen, (None,)), 2):
             if nextDir and nextDir.exists():
                 continue
 
