@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Iterable, Union
+from typing import List, Iterable, Union, Optional
 
 from tag_space_tools import modulePath
 from tag_space_tools.core.file_searcher import TagSpaceSearcher
@@ -16,10 +16,16 @@ class TagFinder:
 
         return sorted(t.title for t in tags)
 
-    def genFilesWithTag(self, tagName: str) -> Iterable[Path]:
+    def genFilesWithTag(self, tagName: str,
+                        extensions: Optional[list[str]] = None
+                        ) -> Iterable[Path]:
+        if extensions is not None:
+            extensions = [e if e.startswith('.') else e + '.' for e in extensions]
+
         for tagEntry in self.tss.validTagEntries:
             if tagName in tagEntry.tags:
-                yield tagEntry.file
+                if extensions is None or tagEntry.file.suffix in extensions:
+                    yield tagEntry.file
 
 
 def main():
