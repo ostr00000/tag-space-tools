@@ -5,7 +5,7 @@ from typing import Iterator, Union, Container
 
 import more_itertools
 
-from tag_space_tools.core.tag_file_mapper import TagFileMapper
+from tag_space_tools.core.tag_finder import TagFinder
 from tag_space_tools.core.tag_space_entry import Tag
 
 logger = logging.getLogger(__name__)
@@ -25,16 +25,16 @@ def sortFiles(sortTag: list[Tag],
               maxFilesInDir=20,
               recursive=True,
               excludeDir: Container[Path] = (),
-              tagFileMapper: TagFileMapper = None):
+              tagFinder: TagFinder = None):
     """Move files and their tags from 'srcDir' to 'destDir'.
     If there are more than 'maxFilesInDir' then create subdirectory.
     Subdirectory name is chosen based on moving file tags and 'sortTag' argument.
     """
     destDir = Path(destDir)
-    if tagFileMapper is None:
-        tagFileMapper = TagFileMapper(destDir)
+    if tagFinder is None:
+        tagFinder = TagFinder(destDir)
 
-    for tagEntry in tagFileMapper.getTagEntryInDir(srcDir, recursive=recursive):
+    for tagEntry in tagFinder.getTagEntryInDir(srcDir, recursive=recursive):
 
         lastDir = destDir
         dirGen = _dirGen(sortTag, tagEntry.tags, destDir)
@@ -45,14 +45,14 @@ def sortFiles(sortTag: list[Tag],
             if lastDir in excludeDir:
                 continue
 
-            taggedFilesCount = len(tagFileMapper.getTagEntryInDir(lastDir, recursive=False))
+            taggedFilesCount = len(tagFinder.getTagEntryInDir(lastDir, recursive=False))
             if taggedFilesCount < maxFilesInDir:
                 tagEntry.move(lastDir)
                 break
             elif taggedFilesCount == maxFilesInDir:
                 tagEntry.move(lastDir)
                 sortFiles(sortTag, lastDir, destDir, maxFilesInDir,
-                          recursive=False, excludeDir=(lastDir,), tagFileMapper=tagFileMapper)
+                          recursive=False, excludeDir=(lastDir,), tagFinder=tagFinder)
                 break
 
         else:

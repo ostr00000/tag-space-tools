@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import List, Iterable, Union, Optional
 
-from tag_space_tools import modulePath
 from tag_space_tools.core.file_searcher import TagSpaceSearcher
 
 
@@ -27,19 +26,8 @@ class TagFinder:
                 if extensions is None or tagEntry.file.suffix in extensions:
                     yield tagEntry.file
 
-
-def main():
-    p = Path(modulePath).parent.parent / 'test'
-    print(p)
-    tagFinder = TagFinder(p)
-
-    allTags = tagFinder.findAllTags()
-    print(allTags)
-    for tagName in allTags:
-        print(f'Tag: {tagName}')
-        for fileName in tagFinder.genFilesWithTag(tagName):
-            print(fileName)
-
-
-if __name__ == '__main__':
-    main()
+    def getTagEntryInDir(self, dirPath: Path, recursive=True):
+        if recursive:
+            return [te for te in self.tss.validTagEntries if te.file.is_relative_to(dirPath)]
+        else:
+            return [te for te in self.tss.validTagEntries if te.file.parent == dirPath]
