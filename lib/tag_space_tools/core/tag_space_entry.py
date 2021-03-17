@@ -2,10 +2,12 @@ import inspect
 import json
 import logging
 import shutil
-from dataclasses import dataclass
+from contextlib import contextmanager
+from dataclasses import dataclass, asdict
+from datetime import datetime
 from functools import cached_property
 from pathlib import Path
-from typing import Optional, List, ClassVar
+from typing import Optional, List, ClassVar, TypedDict, Dict, ContextManager, TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +40,32 @@ class Tag:
         return hash(self.title)
 
 
+class TagDict(TypedDict):
+    type: str
+    title: str
+    description: str
+    functionality: str
+    style: str
+    icon: str
+    color: str
+    textcolor: str
+    created_date: str
+    modified_date: str
+
+
+TagType = TypeVar('TagType', TagDict, Tag)
+
+
+class ConfigDict(TypedDict):
+    tags: Dict[str, TagType]
+    description: str
+    color: str
+    appVersionCreated: str
+    appName: str
+    appVersionUpdated: str
+    lastUpdated: str
+
+
 @dataclass
 class TagSpaceEntry:
     TAG_DIR: ClassVar = '.ts'
@@ -56,16 +84,74 @@ class TagSpaceEntry:
 
     @cached_property
     def tags(self) -> List[Tag]:
-        with open(self.configFile, encoding='utf-8-sig') as cf:
-            configJson = json.load(cf)
+        with self._configContext() as configJson:
+            return list(configJson['tags'].values())
 
-        try:
-            tags = [Tag.fromDict(tagJson) for tagJson in configJson['tags']]
-            return tags
-        except KeyError:
-            return []
+    def renameTag(self, fromTagName: str, toTagName: str):
+        """If file has *fromTagName* then change this tag to *toTagName*."""
+        if fromTagName not in self.tags:
+            return False
+
+        with self._configContext(edit=True) as configJson:
+            changingTag = configJson['tags'].get(fromTagName, {})
+            changingTag['title'] = toTagName
+            changingTag['modified_date'] = datetime.now().astimezone().isoformat()
+
+        for t in self.tags:
+            if t.title == fromTagName:
+                t.title = toTagName
+                break
+
+        return True
+
+    def removeTag(self, removeTagName: str):
+        if removeTagName not in self.tags:
+            return False
+
+        with self._configContext(edit=True) as configJson:
+            removingTag: dict = configJson['tags'].get(removeTagName, {})
+            removingTag.pop('title', None)
+
+        for t in self.tags:
+            if t.title == removeTagName:
+                self.tags.remove(t)
+                break
+        return True
+
+    def addTag(self, tag: Tag):
+        if tag.title in self.tags:
+            return True
+
+        with self._configContext(edit=True) as configJson:
+            addingTag: dict = configJson['tags']
+            addingTag[tag.title] = asdict(tag)
+            addingTag['modified_date'] = datetime.now().astimezone().isoformat()
+
+        self.tags.append(tag)
+        return True
+
+    @contextmanager
+    def _configContext(self, edit=False) -> ContextManager[ConfigDict]:
+        mode = 'r+' if edit else 'r'
+        with open(self.configFile, mode, encoding='utf-8-sig') as cf:
+            configJson = json.load(cf)
+            try:
+                tags = {tagJson['title']: tagJson if edit else Tag.fromDict(tagJson)
+                        for tagJson in configJson['tags']}
+            except KeyError:
+                tags = []
+            configJson['tags'] = tags
+
+            yield configJson
+            if edit:
+                configJson['tags'] = [t for t in configJson['tags'].values()]
+                configJson['lastUpdated'] = datetime.now().astimezone().isoformat()
+                cf.seek(0)
+                json.dump(configJson, cf)
+                cf.truncate()
 
     def move(self, destDir: Path):
+        """Move file with its meta file to *destDir*."""
         metaDir = destDir / self.TAG_DIR
         metaDir.mkdir(exist_ok=True, parents=True)
 

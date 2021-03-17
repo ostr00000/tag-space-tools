@@ -26,8 +26,32 @@ class TagFinder:
                 if extensions is None or tagEntry.file.suffix in extensions:
                     yield tagEntry.file
 
+    def getAllTagEntries(self):
+        return self.tss.validTagEntries
+
     def getTagEntryInDir(self, dirPath: Path, recursive=True):
         if recursive:
             return [te for te in self.tss.validTagEntries if te.file.is_relative_to(dirPath)]
         else:
             return [te for te in self.tss.validTagEntries if te.file.parent == dirPath]
+
+
+if __name__ == '__main__':
+    def main():
+        tf = TagFinder('./s')
+        entries = tf.getAllTagEntries()
+        e = entries[0]
+        print(e)
+        from pprint import pprint
+        pprint(e.tags)
+
+        ok = e.renameTag('sitting', 'sit')
+        print(ok)
+        if not ok:
+            ok = e.renameTag('sit', 'sitting')
+            print(ok)
+
+        pprint(e.tags)
+
+
+    main()
