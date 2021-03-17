@@ -1,2 +1,0 @@
-class EmptyTagSpaceDirException(Exception):
-    pass

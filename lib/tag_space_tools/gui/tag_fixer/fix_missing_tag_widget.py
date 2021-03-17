@@ -11,9 +11,8 @@ from pyqt_utils.metaclass.slot_decorator import SlotDecoratorMeta
 from pyqt_utils.ui_base_widget import BaseWidget
 from tag_space_tools.core import tagSpaceCoreName
 from tag_space_tools.core.file_searcher import TagSpaceSearcher
-from tag_space_tools.gui.exceptions import EmptyTagSpaceDirException
 from tag_space_tools.gui.settings import settings
-from tag_space_tools.gui.text_handler import TextEditHandler
+from tag_space_tools.gui.tag_fixer.text_handler import TextEditHandler
 from tag_space_tools.ui.ui_fix_widget import Ui_TagSpaceFixWidget
 
 logger = logging.getLogger(__name__)
@@ -67,7 +66,7 @@ class FixMissingTagWidget(Ui_TagSpaceFixWidget, BaseWidget, QWidget, metaclass=S
                     caption="Select tag space root directory")
 
             if not loc:
-                raise EmptyTagSpaceDirException()
+                return
 
             settings.LAST_PATH = loc
             tss = TagSpaceSearcher(loc)
