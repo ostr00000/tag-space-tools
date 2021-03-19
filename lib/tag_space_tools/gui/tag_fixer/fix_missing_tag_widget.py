@@ -6,12 +6,13 @@ from PyQt5.QtCore import Qt, QSortFilterProxyModel
 from PyQt5.QtGui import QStandardItemModel
 from PyQt5.QtWidgets import QFileDialog, QApplication, QWidget
 
-from pyqt_utils.decorators import cursorDec
+from pyqt_settings.field.base import Field
 from pyqt_utils.metaclass.slot_decorator import SlotDecoratorMeta
-from pyqt_utils.ui_base_widget import BaseWidget
+from pyqt_utils.python.decorators import cursorDec
+from pyqt_utils.widgets.base_widget import BaseWidget
 from tag_space_tools.core import tagSpaceCoreName
 from tag_space_tools.core.file_searcher import TagSpaceSearcher
-from tag_space_tools.gui.settings import settings
+from tag_space_tools.gui.settings import settings, TagSpacePluginSettings
 from tag_space_tools.gui.tag_fixer.text_handler import TextEditHandler
 from tag_space_tools.ui.ui_fix_widget import Ui_TagSpaceFixWidget
 

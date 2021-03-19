@@ -4,7 +4,7 @@ from pathlib import Path
 from PyQt5.QtWidgets import QWidget, QFileDialog
 
 from pyqt_utils.metaclass.slot_decorator import SlotDecoratorMeta
-from pyqt_utils.ui_base_widget import BaseWidget
+from pyqt_utils.widgets.base_widget import BaseWidget
 from tag_space_tools.core.file_sorter import sortFiles
 from tag_space_tools.gui.settings import settings
 from tag_space_tools.gui.tag_sorter.parser import loadTagLibrary
