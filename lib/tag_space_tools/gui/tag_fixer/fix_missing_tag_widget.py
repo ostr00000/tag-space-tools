@@ -1,9 +1,10 @@
 import logging
 import traceback
 from contextlib import contextmanager
+from pathlib import Path
 
 from PyQt5.QtCore import Qt, QSortFilterProxyModel
-from PyQt5.QtGui import QStandardItemModel
+from PyQt5.QtGui import QStandardItemModel, QColor
 from PyQt5.QtWidgets import QFileDialog, QApplication, QWidget
 
 from pyqt_settings.field.base import Field
@@ -44,9 +45,17 @@ class FixMissingTagWidget(Ui_TagSpaceFixWidget, BaseWidget, QWidget, metaclass=S
         self.textHandler = TextEditHandler(self.textEdit, self.model, self.treeView)
 
         self.fixButton.clicked.connect(self.onFixTagsClicked)
-        self.resetButton.clicked.connect(self.onCleanLastPath)
         self.advancedMode.clicked.connect(self.onAdvancedModeChanged)
         self.advancedMode.setCheckState(Qt.PartiallyChecked)
+
+        field: Field = TagSpacePluginSettings.LIBRARY_PATH
+        self.libraryWidget = field.createWidgetWithLabel(settings)
+        self.libraryWidget.button.clicked.connect(self.onSaveLibraryPath)
+        self.layout().replaceWidget(self.libraryPlaceholder, self.libraryWidget)
+        self.libraryPlaceholder.deleteLater()
+
+    def onSaveLibraryPath(self):
+        settings.LIBRARY_PATH = self.libraryWidget.fieldFidget.getValue()
 
     @contextmanager
     def handleException(self):
@@ -55,27 +64,23 @@ class FixMissingTagWidget(Ui_TagSpaceFixWidget, BaseWidget, QWidget, metaclass=S
         except Exception as exc:
             text = f'{exc}\n{traceback.format_exc()}'
             logger.error(text)
-            self.textHandler.addText(text, Qt.red)
+            self.textHandler.addText(text, QColor(Qt.red))
             QApplication.processEvents()
 
     @cursorDec
     def onFixTagsClicked(self):
         with self.handleException(), useHandler(tagSpaceCoreName, self.textHandler):
-            loc = settings.LAST_PATH
+            loc = settings.LIBRARY_PATH
             if not loc:
                 loc = QFileDialog.getExistingDirectory(
                     caption="Select tag space root directory")
 
-            if not loc:
+            if not (loc and Path(loc).exists()):
                 return
 
-            settings.LAST_PATH = loc
+            settings.LIBRARY_PATH = loc
             tss = TagSpaceSearcher(loc)
             tss.match()
-
-    @staticmethod
-    def onCleanLastPath():
-        settings.LAST_PATH = ''
 
     def onAdvancedModeChanged(self):
         state = self.advancedMode.checkState()

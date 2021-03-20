@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../resources.qrc">
-    <normaloff>:/icons/icons/main.jpg</normaloff>:/icons/icons/main.jpg
+       <normaloff>:/icons/icons/main.jpg</normaloff>:/icons/icons/main.jpg
    </iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -44,13 +44,6 @@
        </property>
        <property name="tristate">
         <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QToolButton" name="resetButton">
-       <property name="text">
-        <string>Clean last path</string>
        </property>
       </widget>
      </item>
@@ -127,17 +120,24 @@
          </item>
         </layout>
        </item>
-       <item>
-        <widget class="QTreeView" name="treeView">
-         <attribute name="headerVisible">
-          <bool>false</bool>
-         </attribute>
-        </widget>
-       </item>
+          <item>
+              <widget class="QTreeView" name="treeView">
+                  <attribute name="headerVisible">
+                      <bool>false</bool>
+                  </attribute>
+              </widget>
+          </item>
       </layout>
      </widget>
     </widget>
    </item>
+      <item>
+          <widget class="QPushButton" name="libraryPlaceholder">
+              <property name="text">
+                  <string>library path placeholder</string>
+              </property>
+          </widget>
+      </item>
   </layout>
  </widget>
  <resources>

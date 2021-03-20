@@ -1,12 +1,11 @@
 import logging
-from pathlib import Path
 
-from PyQt5.QtWidgets import QWidget, QFileDialog
+from PyQt5.QtWidgets import QWidget, QFileDialog, QVBoxLayout
 
 from pyqt_utils.metaclass.slot_decorator import SlotDecoratorMeta
 from pyqt_utils.widgets.base_widget import BaseWidget
 from tag_space_tools.core.file_sorter import sortFiles
-from tag_space_tools.gui.settings import settings
+from tag_space_tools.gui.settings import settings, TagSpacePluginSettings
 from tag_space_tools.gui.tag_sorter.parser import loadTagLibrary
 from tag_space_tools.ui.ui_tag_sorter import Ui_TagSorter
 
@@ -16,18 +15,30 @@ logger = logging.getLogger(__name__)
 class TagSorter(Ui_TagSorter, BaseWidget, QWidget, metaclass=SlotDecoratorMeta):
     def __post_init__(self, *args, **kwargs):
         super(TagSorter, self).__post_init__(*args, **kwargs)
-        self.loadTagsButton.clicked.connect(self.onLoadTagsButton)
-        self.fromButton.clicked.connect(self.onFromButtonClicked)
-        self.toButton.clicked.connect(self.onToButtonClicked)
-        self.maxFilesPerLevelSpinBox.valueChanged.connect(self.onMaxFilesChanged)
-        self.removeTagButton.clicked.connect(self.listWidget.removeSelected)
-        self.moveFilesButton.clicked.connect(self.onMoveFilesClicked)
-        self.saveButton.clicked.connect(self.onSaveButtonClicked)
-        self.listWidget.dataChanged.connect(self.onDataChanged)
 
-        self.maxFilesPerLevelSpinBox.setValue(settings.MAX_FILES_PER_LEVEL)
-        self.toLineEdit.setText(settings.TO_PATH)
-        self.fromLineEdit.setText(settings.FROM_PATH)
+        self.toPath = TagSpacePluginSettings.LIBRARY_PATH.createWidgetWithLabel(
+            settings, self, layoutType=QVBoxLayout)
+        self.toPath.button.clicked.connect(self.onToButtonClicked)
+        self.layout().replaceWidget(self.toFolderPlaceholder, self.toPath)
+        self.toFolderPlaceholder.deleteLater()
+
+        self.fromPath = TagSpacePluginSettings.UNSORTED_PATH.createWidgetWithLabel(
+            settings, self, layoutType=QVBoxLayout)
+        self.fromPath.button.clicked.connect(self.onFromButtonClicked)
+        self.layout().replaceWidget(self.fromFolderPlaceholder, self.fromPath)
+        self.fromFolderPlaceholder.deleteLater()
+
+        self.maxFiles = TagSpacePluginSettings.MAX_FILES_PER_LEVEL. \
+            createWidgetWithLabel(settings, self, layoutType=QVBoxLayout)
+        self.maxFiles.button.clicked.connect(self.onMaxFilesChanged)
+        self.layout().replaceWidget(self.maxFilesPlaceholder, self.maxFiles)
+        self.maxFilesPlaceholder.deleteLater()
+
+        self.loadTagsButton.clicked.connect(self.onLoadTagsButton)
+        self.removeTagButton.clicked.connect(self.listWidget.removeSelected)
+        self.listWidget.dataChanged.connect(self.onDataChanged)
+        self.saveButton.clicked.connect(self.onSaveButtonClicked)
+        self.moveFilesButton.clicked.connect(self.onMoveFilesClicked)
 
         if sortedTags := settings.SORTED_TAGS:
             self.listWidget.addItems(sortedTags)
@@ -43,44 +54,17 @@ class TagSorter(Ui_TagSorter, BaseWidget, QWidget, metaclass=SlotDecoratorMeta):
             self, "Select tag library", filter='*.json')
         if not path:
             return
-        settings.LIBRARY_PATH = path
+        settings.SORT_FILE_LIBRARY = path
         self.listWidget.replaceTags(loadTagLibrary(path))
 
     def onFromButtonClicked(self):
-        path = QFileDialog.getExistingDirectory(
-            self, "Select folder with unsorted files")
-        if not path:
-            return
-        settings.FROM_PATH = path
-        self.fromLineEdit.setText(path)
+        settings.UNSORTED_PATH = self.fromPath.getValue()
 
     def onToButtonClicked(self):
-        path = QFileDialog.getExistingDirectory(
-            self, "Select main library folder")
-        if not path:
-            return
-        settings.TO_PATH = path
-        self.toLineEdit.setText(path)
+        settings.LIBRARY_PATH = self.toPath.getValue()
 
     def onMaxFilesChanged(self):
-        val = self.maxFilesPerLevelSpinBox.value()
-        settings.MAX_FILES_PER_LEVEL = val
-
-    def onMoveFilesClicked(self):
-        sortTags = self.listWidget.getSortTags()
-        if not sortTags:
-            return
-
-        fromPath = self.fromLineEdit.text()
-        if not (fromPath and Path(fromPath).exists()):
-            return
-
-        toPath = self.toLineEdit.text()
-        if not (toPath and Path(toPath).exists()):
-            return
-
-        maxFiles = self.maxFilesPerLevelSpinBox.value()
-        sortFiles(sortTags, fromPath, toPath, maxFiles)
+        settings.MAX_FILES_PER_LEVEL = self.maxFiles.getValue()
 
     def onSaveButtonClicked(self):
         savePath: str
@@ -95,3 +79,11 @@ class TagSorter(Ui_TagSorter, BaseWidget, QWidget, metaclass=SlotDecoratorMeta):
 
         settings.LAST_SAVE_FILE = savePath
         self.listWidget.saveToFile(savePath)
+
+    @staticmethod
+    def onMoveFilesClicked():
+        fromPath = settings.UNSORTED_PATH
+        toPath = settings.LIBRARY_PATH
+        sortTags = settings.SORTED_TAGS
+        maxFiles = settings.MAX_FILES_PER_LEVEL
+        sortFiles(sortTags, fromPath, toPath, maxFiles)
