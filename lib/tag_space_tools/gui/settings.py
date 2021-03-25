@@ -9,7 +9,7 @@ from tag_space_tools.core.tag_space_entry import Tag
 
 
 class TagSpacePluginSettings(QSettings):
-    LIBRARY_PATH = PathField('general/library_path')
+    LIBRARY_PATH = PathField('common/library_path')
     LIBRARY_PATH.widgetFactory = WidgetFactory(PathLineEdit, configFunctions=[
         ConfigFunc(QFileDialog.setWindowTitle, "Select main library folder"),
         ConfigFunc(QFileDialog.setFileMode, QFileDialog.Directory)])

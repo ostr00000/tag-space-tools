@@ -18,21 +18,15 @@ class TagSorter(Ui_TagSorter, BaseWidget, QWidget, metaclass=SlotDecoratorMeta):
 
         self.toPath = TagSpacePluginSettings.LIBRARY_PATH.createWidgetWithLabel(
             settings, self, layoutType=QVBoxLayout)
-        self.toPath.button.clicked.connect(self.onToButtonClicked)
-        self.layout().replaceWidget(self.toFolderPlaceholder, self.toPath)
-        self.toFolderPlaceholder.deleteLater()
+        self.toPath.replaceWidget(self.toFolderPlaceholder)
 
         self.fromPath = TagSpacePluginSettings.UNSORTED_PATH.createWidgetWithLabel(
             settings, self, layoutType=QVBoxLayout)
-        self.fromPath.button.clicked.connect(self.onFromButtonClicked)
-        self.layout().replaceWidget(self.fromFolderPlaceholder, self.fromPath)
-        self.fromFolderPlaceholder.deleteLater()
+        self.fromPath.replaceWidget(self.fromFolderPlaceholder)
 
         self.maxFiles = TagSpacePluginSettings.MAX_FILES_PER_LEVEL. \
             createWidgetWithLabel(settings, self, layoutType=QVBoxLayout)
-        self.maxFiles.button.clicked.connect(self.onMaxFilesChanged)
-        self.layout().replaceWidget(self.maxFilesPlaceholder, self.maxFiles)
-        self.maxFilesPlaceholder.deleteLater()
+        self.maxFiles.replaceWidget(self.maxFilesPlaceholder)
 
         self.loadTagsButton.clicked.connect(self.onLoadTagsButton)
         self.removeTagButton.clicked.connect(self.listWidget.removeSelected)
@@ -56,15 +50,6 @@ class TagSorter(Ui_TagSorter, BaseWidget, QWidget, metaclass=SlotDecoratorMeta):
             return
         settings.SORT_FILE_LIBRARY = path
         self.listWidget.replaceTags(loadTagLibrary(path))
-
-    def onFromButtonClicked(self):
-        settings.UNSORTED_PATH = self.fromPath.getValue()
-
-    def onToButtonClicked(self):
-        settings.LIBRARY_PATH = self.toPath.getValue()
-
-    def onMaxFilesChanged(self):
-        settings.MAX_FILES_PER_LEVEL = self.maxFiles.getValue()
 
     def onSaveButtonClicked(self):
         savePath: str
