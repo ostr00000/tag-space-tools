@@ -1,12 +1,14 @@
+from __future__ import annotations
+
 import logging
 import re
 from contextlib import contextmanager
 from itertools import takewhile
 from typing import Optional, Dict, List
 
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QSortFilterProxyModel
 from PyQt5.QtGui import QColor, QTextCursor, QStandardItemModel, QStandardItem
-from PyQt5.QtWidgets import QTextEdit, QTreeView
+from PyQt5.QtWidgets import QTextEdit, QTreeView, QLineEdit
 
 
 @contextmanager
@@ -31,23 +33,42 @@ class TextEditHandler(logging.Handler):
     PREFIX_MAX_SIZE = 30
     VALID_PREFIX = re.compile(r'[^\w ]')
 
-    def __init__(self, textEdit: QTextEdit, itemModel: QStandardItemModel, treeView: QTreeView):
+    @contextmanager
+    def useForLogger(self, loggerName: str):
+        self.reset()
+        tagLogger = logging.getLogger(loggerName)
+        tagLogger.addHandler(self)
+        yield
+        tagLogger.removeHandler(self)
+
+    def __init__(self, textEdit: QTextEdit, treeView: QTreeView, filterLineEdit: QLineEdit = None):
         super().__init__()
         self.treeView = treeView
         self.textEdit = textEdit
-        self.itemModel = itemModel
-        self._reset()
+        self.filterLineEdit = filterLineEdit
 
-    def reset(self):
-        self._reset()
+        self.model = QStandardItemModel(self.treeView)
+        self.filterModel = QSortFilterProxyModel(self.treeView)
+        self.filterModel.setSourceModel(self.model)
+        self.filterModel.setFilterCaseSensitivity(Qt.CaseInsensitive)
+        self.filterModel.setRecursiveFilteringEnabled(True)
+        self.treeView.setModel(self.filterModel)
 
-    def _reset(self):
-        self.itemModel.clear()
-        self.topItem = QStandardItem('Top Item')
-        self.itemModel.setItem(0, 0, self.topItem)
+        if self.filterLineEdit is not None:
+            self.filterLineEdit.textChanged.connect(self.filterModel.setFilterRegExp)
+        self.treeView.setHeaderHidden(True)
 
+        self.topItem = None
         self._groups: List[str] = []
         self._prefix: Dict[str, QStandardItem] = {}
+        self.reset()
+
+    def reset(self):
+        self.model.clear()
+        self.topItem = QStandardItem('Top Item')
+        self.model.setItem(0, 0, self.topItem)
+        self._groups.clear()
+        self._prefix.clear()
 
     def emit(self, record: logging.LogRecord):
         msg = self.format(record)

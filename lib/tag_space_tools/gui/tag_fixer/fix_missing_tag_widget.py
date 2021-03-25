@@ -3,8 +3,8 @@ import traceback
 from contextlib import contextmanager
 from pathlib import Path
 
-from PyQt5.QtCore import Qt, QSortFilterProxyModel
-from PyQt5.QtGui import QStandardItemModel, QColor
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QFileDialog, QApplication, QWidget
 
 from pyqt_settings.field.base import Field
@@ -20,29 +20,11 @@ from tag_space_tools.ui.ui_fix_widget import Ui_TagSpaceFixWidget
 logger = logging.getLogger(__name__)
 
 
-@contextmanager
-def useHandler(loggerName: str, handler: TextEditHandler):
-    handler.reset()
-    tagLogger = logging.getLogger(loggerName)
-    tagLogger.addHandler(handler)
-    yield
-    tagLogger.removeHandler(handler)
-
-
 class FixMissingTagWidget(Ui_TagSpaceFixWidget, BaseWidget, QWidget, metaclass=SlotDecoratorMeta):
 
     def __post_init__(self, *args, **kwargs):
         super().__post_init__(*args, **kwargs)
-
-        self.model = QStandardItemModel(self.treeView)
-        self.filterModel = QSortFilterProxyModel(self.treeView)
-        self.filterModel.setSourceModel(self.model)
-        self.filterModel.setFilterCaseSensitivity(Qt.CaseInsensitive)
-        self.filterModel.setRecursiveFilteringEnabled(True)
-        self.treeView.setModel(self.filterModel)
-        self.filterLine.textChanged.connect(self.filterModel.setFilterRegExp)
-
-        self.textHandler = TextEditHandler(self.textEdit, self.model, self.treeView)
+        self.textHandler = TextEditHandler(self.textEdit, self.treeView, self.filterLine)
 
         self.fixButton.clicked.connect(self.onFixTagsClicked)
         self.advancedMode.clicked.connect(self.onAdvancedModeChanged)
@@ -50,12 +32,10 @@ class FixMissingTagWidget(Ui_TagSpaceFixWidget, BaseWidget, QWidget, metaclass=S
 
         field: Field = TagSpacePluginSettings.LIBRARY_PATH
         self.libraryWidget = field.createWidgetWithLabel(settings)
-        self.libraryWidget.button.clicked.connect(self.onSaveLibraryPath)
-        self.layout().replaceWidget(self.libraryPlaceholder, self.libraryWidget)
-        self.libraryPlaceholder.deleteLater()
+        self.libraryWidget.replaceWidget(self.libraryPlaceholder)
 
     def onSaveLibraryPath(self):
-        settings.LIBRARY_PATH = self.libraryWidget.fieldFidget.getValue()
+        settings.LIBRARY_PATH = self.libraryWidget.fieldWidget.getValue()
 
     @contextmanager
     def handleException(self):
@@ -69,7 +49,7 @@ class FixMissingTagWidget(Ui_TagSpaceFixWidget, BaseWidget, QWidget, metaclass=S
 
     @cursorDec
     def onFixTagsClicked(self):
-        with self.handleException(), useHandler(tagSpaceCoreName, self.textHandler):
+        with self.handleException(), self.textHandler.useForLogger(tagSpaceCoreName):
             loc = settings.LIBRARY_PATH
             if not loc:
                 loc = QFileDialog.getExistingDirectory(
