@@ -94,6 +94,8 @@ class TagSpaceEntry:
 
         with self._configContext(edit=True) as configJson:
             changingTag = configJson['tags'].get(fromTagName, {})
+            logger.info(f"Rename tag:'{changingTag['title']}' to '{toTagName}' "
+                        f"for file '{self.file.name}'")
             changingTag['title'] = toTagName
             changingTag['modified_date'] = datetime.now().astimezone().isoformat()
 

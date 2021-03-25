@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List, Iterable, Union, Optional
 
 from tag_space_tools.core.file_searcher import TagSpaceSearcher
+from tag_space_tools.core.tag_space_entry import TagSpaceEntry
 
 
 class TagFinder:
@@ -21,10 +22,14 @@ class TagFinder:
         if extensions is not None:
             extensions = [e if e.startswith('.') else e + '.' for e in extensions]
 
+        for tagEntry in self.genEntriesWithTag(tagName):
+            if extensions is None or tagEntry.file.suffix in extensions:
+                yield tagEntry.file
+
+    def genEntriesWithTag(self, tagName: str) -> Iterable[TagSpaceEntry]:
         for tagEntry in self.tss.validTagEntries:
             if tagName in tagEntry.tags:
-                if extensions is None or tagEntry.file.suffix in extensions:
-                    yield tagEntry.file
+                yield tagEntry
 
     def getAllTagEntries(self):
         return self.tss.validTagEntries
