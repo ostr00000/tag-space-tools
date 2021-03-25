@@ -4,6 +4,7 @@ from pyqt_utils.metaclass.geometry_saver import GeometrySaverMeta
 from pyqt_utils.widgets.base_widget import BaseWidget
 from tag_space_tools.gui.settings import settings
 from tag_space_tools.gui.tag_fixer.fix_missing_tag_widget import FixMissingTagWidget
+from tag_space_tools.gui.tag_rename import TagRename
 from tag_space_tools.gui.tag_sorter.widget import TagSorter
 
 
@@ -17,3 +18,6 @@ class TagSpaceTabWidget(BaseWidget, QTabWidget, settings=settings,
 
         self.tagSorterWidget = TagSorter(self)
         self.addTab(self.tagSorterWidget, "Sort tagged files")
+
+        self.tagRename = TagRename(self)
+        self.addTab(self.tagRename, "Rename tag")
