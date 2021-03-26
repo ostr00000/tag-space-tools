@@ -1,12 +1,13 @@
+from os import PathLike
 from pathlib import Path
-from typing import List, Iterable, Union, Optional
+from typing import List, Iterable, Optional
 
 from tag_space_tools.core.file_searcher import TagSpaceSearcher
 from tag_space_tools.core.tag_space_entry import TagSpaceEntry
 
 
 class TagFinder:
-    def __init__(self, path: Union[Path, str]):
+    def __init__(self, path: PathLike):
         self.tss = TagSpaceSearcher(path)
 
     def findAllTags(self) -> List[str]:
@@ -34,29 +35,12 @@ class TagFinder:
     def getAllTagEntries(self):
         return self.tss.validTagEntries
 
-    def getTagEntryInDir(self, dirPath: Path, recursive=True):
+    def getTagEntryInDir(self, dirPath: PathLike, recursive=True):
         if recursive:
             return [te for te in self.tss.validTagEntries if te.file.is_relative_to(dirPath)]
         else:
             return [te for te in self.tss.validTagEntries if te.file.parent == dirPath]
 
-
-if __name__ == '__main__':
-    def main():
-        tf = TagFinder('./s')
-        entries = tf.getAllTagEntries()
-        e = entries[0]
-        print(e)
-        from pprint import pprint
-        pprint(e.tags)
-
-        ok = e.renameTag('sitting', 'sit')
-        print(ok)
-        if not ok:
-            ok = e.renameTag('sit', 'sitting')
-            print(ok)
-
-        pprint(e.tags)
-
-
-    main()
+    def getTagEntriesWithMissingConfig(self) -> Iterable[TagSpaceEntry]:
+        for entries in self.tss.missingTagFiles.values():
+            yield from entries

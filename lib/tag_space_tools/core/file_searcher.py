@@ -1,8 +1,9 @@
 import logging
 import shutil
 from collections import defaultdict
+from os import PathLike
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List
 
 from tag_space_tools.core.tag_space_entry import TagSpaceEntry
 
@@ -14,7 +15,7 @@ class TagSpaceSearcher:
     Config files - special files from Tag Spaces located in TagSpaceEntry.TAG_DIR.
     """
 
-    def __init__(self, location: Union[Path, str], recursive=True):
+    def __init__(self, location: PathLike, recursive=True):
         self.location = Path(location)
         self.recursive = recursive
 

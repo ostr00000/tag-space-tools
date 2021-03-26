@@ -1,4 +1,5 @@
 import inspect
+import itertools
 import json
 import logging
 import shutil
@@ -154,14 +155,34 @@ class TagSpaceEntry:
 
     def move(self, destDir: Path):
         """Move file with its meta file to *destDir*."""
-        metaDir = destDir / self.TAG_DIR
-        metaDir.mkdir(exist_ok=True, parents=True)
+        destFile = None
 
-        destFile = destDir / self.file.name
-        logger.debug(f"Moving {self.file} to {destFile}")
-        shutil.move(self.file, destFile)
-        self.file = destFile
+        if self.file is not None:
+            destDir.mkdir(exist_ok=True, parents=True)
+            destFile = destDir / self.file.name
+            destFile = generateUniqueFile(destFile)
 
-        destFile = metaDir / self.configFile.name
-        shutil.move(self.configFile, destFile)
-        self.configFile = destFile
+            logger.debug(f"Moving {self.file} to {destFile}")
+            shutil.move(self.file, destFile)
+            self.file = destFile
+
+        if self.configFile is not None:
+            metaDir = destDir / self.TAG_DIR
+            metaDir.mkdir(exist_ok=True, parents=True)
+
+            if destFile is not None:
+                destFile = metaDir / destFile.name
+            else:
+                destFile = metaDir / self.configFile.name
+
+            logger.debug(f"Moving {self.configFile} to {destFile}")
+            shutil.move(self.configFile, destFile)
+            self.configFile = destFile
+
+
+def generateUniqueFile(file: Path):
+    baseStem = file.stem
+    for i in itertools.count(start=1):
+        if not file.exists():
+            return file
+        file = file.with_stem(f'{baseStem}_{i}')
