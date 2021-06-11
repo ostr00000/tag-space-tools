@@ -1,4 +1,5 @@
 import logging
+import os
 
 from PyQt5.QtWidgets import QWidget, QFileDialog, QVBoxLayout
 
@@ -33,6 +34,7 @@ class TagSorter(Ui_TagSorter, BaseWidget, QWidget, metaclass=SlotDecoratorMeta):
         self.listWidget.dataChanged.connect(self.onDataChanged)
         self.saveButton.clicked.connect(self.onSaveButtonClicked)
         self.moveFilesButton.clicked.connect(self.onMoveFilesClicked)
+        self.emptyFolderCleanButton.clicked.connect(self.onCleanEmptyFolders)
 
         if sortedTags := settings.SORTED_TAGS:
             self.listWidget.addItems(sortedTags)
@@ -73,3 +75,14 @@ class TagSorter(Ui_TagSorter, BaseWidget, QWidget, metaclass=SlotDecoratorMeta):
         sortTags = settings.SORTED_TAGS
         maxFiles = settings.MAX_FILES_PER_LEVEL
         sortFiles(sortTags, fromPath, toPath, maxFiles)
+
+    @staticmethod
+    def onCleanEmptyFolders():
+        libPath = settings.LIBRARY_PATH
+        for dirPath, dirNames, fileNames in os.walk(libPath):
+            if not dirNames and not fileNames:
+                logger.info(f"Removing {dirPath}")
+                try:
+                    os.rmdir(dirPath)
+                except OSError:
+                    logger.exception(f"Cannot remove {dirPath}")

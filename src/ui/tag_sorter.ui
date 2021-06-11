@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>527</width>
+    <width>564</width>
     <height>519</height>
    </rect>
   </property>
@@ -14,26 +14,66 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="0" column="0" rowspan="6">
-       <layout class="QGridLayout" name="gridLayout">
-           <item row="0" column="0">
-               <layout class="QHBoxLayout" name="horizontalLayout">
-                   <item>
-                       <widget class="QLabel" name="label">
-                           <property name="text">
-                               <string>Tag order:</string>
-                           </property>
-                       </widget>
-                   </item>
+   <item row="4" column="2">
+    <widget class="QPushButton" name="moveFilesButton">
+     <property name="text">
+      <string>Move files</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QPushButton" name="fromFolderPlaceholder">
+     <property name="text">
+      <string>From folder placeholder</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2">
+    <widget class="QPushButton" name="maxFilesPlaceholder">
+     <property name="text">
+      <string>Max files placeholder</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="2">
+    <widget class="QPushButton" name="toFolderPlaceholder">
+     <property name="text">
+      <string>To folder placeholder</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="2">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>294</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="0" column="0" rowspan="7">
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Tag order:</string>
+         </property>
+        </widget>
+       </item>
        <item>
         <widget class="QToolButton" name="loadTagsButton">
          <property name="text">
           <string>Load tag library</string>
          </property>
          <property name="icon">
-             <iconset theme="document-open">
-                 <normaloff>.</normaloff>.
-             </iconset>
+          <iconset theme="document-open">
+           <normaloff>.</normaloff>.</iconset>
          </property>
          <property name="toolButtonStyle">
           <enum>Qt::ToolButtonTextBesideIcon</enum>
@@ -46,9 +86,8 @@
           <string>...</string>
          </property>
          <property name="icon">
-             <iconset theme="document-save-as">
-                 <normaloff>.</normaloff>.
-             </iconset>
+          <iconset theme="document-save-as">
+           <normaloff>.</normaloff>.</iconset>
          </property>
         </widget>
        </item>
@@ -58,9 +97,8 @@
           <string>Remove</string>
          </property>
          <property name="icon">
-             <iconset theme="list-remove">
-                 <normaloff>.</normaloff>.
-             </iconset>
+          <iconset theme="list-remove">
+           <normaloff>.</normaloff>.</iconset>
          </property>
         </widget>
        </item>
@@ -71,57 +109,23 @@
        <property name="dragDropMode">
         <enum>QAbstractItemView::DragDrop</enum>
        </property>
-          <property name="defaultDropAction">
-              <enum>Qt::MoveAction</enum>
-          </property>
-          <property name="selectionMode">
-              <enum>QAbstractItemView::ContiguousSelection</enum>
-          </property>
+       <property name="defaultDropAction">
+        <enum>Qt::MoveAction</enum>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::ContiguousSelection</enum>
+       </property>
       </widget>
      </item>
-       </layout>
+    </layout>
    </item>
-      <item row="4" column="2">
-          <widget class="QPushButton" name="moveFilesButton">
-              <property name="text">
-                  <string>Move files</string>
-              </property>
-          </widget>
-      </item>
-      <item row="2" column="2">
-          <widget class="QPushButton" name="fromFolderPlaceholder">
-              <property name="text">
-                  <string>From folder placeholder</string>
-              </property>
-          </widget>
-      </item>
-      <item row="3" column="2">
-          <widget class="QPushButton" name="toFolderPlaceholder">
-              <property name="text">
-                  <string>To folder placeholder</string>
-              </property>
-          </widget>
-      </item>
-      <item row="5" column="2">
-          <spacer name="verticalSpacer">
-              <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-                  <size>
-                      <width>20</width>
-                      <height>294</height>
-                  </size>
-              </property>
-          </spacer>
-      </item>
-      <item row="1" column="2">
-          <widget class="QPushButton" name="maxFilesPlaceholder">
-              <property name="text">
-                  <string>Max files placeholder</string>
-              </property>
-          </widget>
-      </item>
+   <item row="5" column="2">
+    <widget class="QPushButton" name="emptyFolderCleanButton">
+     <property name="text">
+      <string>Clean empty folders</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <customwidgets>
