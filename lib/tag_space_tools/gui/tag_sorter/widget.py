@@ -41,15 +41,16 @@ class TagSorter(Ui_TagSorter, BaseWidget, QWidget, metaclass=SlotDecoratorMeta):
         self._saveSortedTags()
 
     def _saveSortedTags(self):
-        settings.SORTED_TAGS = self.listWidget.getSortTags()
+        settings.SORTED_TAGS = self.listWidget.getAllTags()
 
     def onLoadTagsButton(self):
         path, ext = QFileDialog.getOpenFileName(
-            self, "Select tag library", filter='*.json')
+            self, "Select tag library",
+            directory=settings.LAST_SAVE_FILE, filter='*.json')
         if not path:
             return
         settings.SORT_FILE_LIBRARY = path
-        self.listWidget.replaceTags(loadTagLibrary(path))
+        self.listWidget.updateTags(loadTagLibrary(path))
 
     def onSaveButtonClicked(self):
         savePath: str

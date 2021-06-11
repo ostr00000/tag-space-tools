@@ -42,6 +42,9 @@ def sortFiles(sortTag: list[Tag],
             if nextDir and nextDir.exists():
                 continue
 
+            if lastDir is None:
+                break
+
             if lastDir in excludeDir:
                 continue
 

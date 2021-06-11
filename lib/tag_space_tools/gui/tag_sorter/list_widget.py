@@ -28,9 +28,19 @@ class TagItem(QListWidgetItem):
 class TagListWidget(QListWidget):
     dataChanged = pyqtSignal()
 
-    def replaceTags(self, tags: Iterable[Tag]):
-        self.clear()
-        self.addItems(tags)
+    def updateTags(self, newTags: Iterable[Tag]):
+        """Remove existing tags that are not in newTag
+        and add tags that are not yet in existing tags."""
+        newTags = list(newTags)
+        for i in reversed(range(self.count())):
+            item = self.item(i)
+            assert isinstance(item, TagItem)
+            try:
+                newTags.remove(item.tag)
+            except ValueError:
+                self.takeItem(i)
+
+        self.addItems(newTags)
 
     def addItems(self, tags: Iterable[Tag]):
         for t in tags:
@@ -43,7 +53,7 @@ class TagListWidget(QListWidget):
             self.takeItem(row)
         self.dataChanged.emit()
 
-    def getSortTags(self) -> list[Tag]:
+    def getAllTags(self) -> list[Tag]:
         sortTags = []
         for i in range(self.count()):
             item = self.item(i)
@@ -55,7 +65,7 @@ class TagListWidget(QListWidget):
         Path(savePath).parent.mkdir(parents=True, exist_ok=True)
         with open(savePath, 'w') as saveFile:
             serialized = json.dumps(
-                self.getSortTags(), default=lambda x: x.__dict__)
+                self.getAllTags(), default=lambda x: x.__dict__)
             saveFile.write(serialized)
 
     def dropEvent(self, event: QDropEvent):
