@@ -8,7 +8,7 @@ from dataclasses import dataclass, asdict
 from datetime import datetime
 from functools import cached_property
 from pathlib import Path
-from typing import Optional, List, ClassVar, TypedDict, Dict, ContextManager, TypeVar
+from typing import Optional, List, TypedDict, Dict, ContextManager, TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -69,8 +69,8 @@ class ConfigDict(TypedDict):
 
 @dataclass
 class TagSpaceEntry:
-    TAG_DIR: ClassVar = '.ts'
-    TSM_FILE: ClassVar = 'tsm.json'
+    TAG_DIR = '.ts'
+    TSM_FILE = 'tsm.json'
 
     file: Optional[Path] = None
     configFile: Optional[Path] = None

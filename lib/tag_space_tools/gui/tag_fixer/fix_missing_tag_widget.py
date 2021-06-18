@@ -34,9 +34,6 @@ class FixMissingTagWidget(Ui_TagSpaceFixWidget, BaseWidget, QWidget, metaclass=S
         self.libraryWidget = field.createWidgetWithLabel(settings)
         self.libraryWidget.replaceWidget(self.libraryPlaceholder)
 
-    def onSaveLibraryPath(self):
-        settings.LIBRARY_PATH = self.libraryWidget.fieldWidget.getValue()
-
     @contextmanager
     def handleException(self):
         try:
