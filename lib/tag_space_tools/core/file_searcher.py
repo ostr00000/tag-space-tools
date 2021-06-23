@@ -58,6 +58,13 @@ class TagSpaceSearcher:
 
     def _findTagSpace(self, location: Path):
         """Find all files and config that do not have corresponding files"""
+        try:
+            if not location.exists():
+                return
+        except IOError as e:
+            logger.exception(e)
+            return
+
         tagDir = location / TagSpaceEntry.TAG_DIR
         metaFiles = set(self._findMetaFiles(tagDir))
 

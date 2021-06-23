@@ -71,6 +71,7 @@ class ConfigDict(TypedDict):
 class TagSpaceEntry:
     TAG_DIR = '.ts'
     TSM_FILE = 'tsm.json'
+    TAG_SUFFIX = '.json'
 
     file: Optional[Path] = None
     configFile: Optional[Path] = None
@@ -171,7 +172,7 @@ class TagSpaceEntry:
             metaDir.mkdir(exist_ok=True, parents=True)
 
             if destFile is not None:
-                destFile = metaDir / destFile.name
+                destFile = metaDir / (destFile.name + self.TAG_SUFFIX)
             else:
                 destFile = metaDir / self.configFile.name
 
