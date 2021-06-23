@@ -21,6 +21,7 @@ class TagRename(Ui_TagRename, BaseWidget, QWidget):
         TagSpacePluginSettings.LIBRARY_PATH.valueChanged.connect(self.onReset)
         self.toComboBox.currentTextChanged.connect(self.onToComboBoxTextChanged)
         self.renameButton.clicked.connect(self.onRenameButtonClicked)
+        self.refreshButton.clicked.connect(self.onReset)
 
         self.onReset()
 
