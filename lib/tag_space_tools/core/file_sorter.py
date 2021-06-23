@@ -25,16 +25,31 @@ def sortFiles(sortTag: list[Tag],
               maxFilesInDir=20,
               recursive=True,
               excludeDir: Container[Path] = (),
-              tagFinder: TagFinder = None):
-    """Move files and their tags from 'srcDir' to 'destDir'.
-    If there are more than 'maxFilesInDir' then create subdirectory.
+              tagFinderDest: TagFinder = None,
+              tagFinderSrc: TagFinder = None):
+    """
+    Move files and their tags from 'srcDir' to 'destDir'.
     Subdirectory name is chosen based on moving file tags and 'sortTag' argument.
+
+    :param sortTag: tag list defining order of sort
+    :param srcDir: source directory
+    :param destDir: destination directory
+    :param maxFilesInDir: If there are more than 'maxFilesInDir'
+        then a new subdirectory will be created.
+    :param recursive: If True then sorting is recursive.
+    :param excludeDir: Directories that will be skipped when sorting.
+    :param tagFinderDest: cached object for better performance
+    :param tagFinderSrc: cached object for better performance
     """
     destDir = Path(destDir)
-    if tagFinder is None:
-        tagFinder = TagFinder(destDir)
+    destDir.mkdir(exist_ok=True, parents=True)
+    if tagFinderDest is None:
+        tagFinderDest = TagFinder(destDir)
 
-    for tagEntry in tagFinder.getTagEntryInDir(srcDir, recursive=recursive):
+    if tagFinderSrc is None:
+        tagFinderSrc = TagFinder(srcDir)
+
+    for tagEntry in tagFinderSrc.getTagEntryInDir(srcDir, recursive=recursive):
 
         lastDir = destDir
         dirGen = _dirGen(sortTag, tagEntry.tags, destDir)
@@ -48,14 +63,15 @@ def sortFiles(sortTag: list[Tag],
             if lastDir in excludeDir:
                 continue
 
-            taggedFilesCount = len(tagFinder.getTagEntryInDir(lastDir, recursive=False))
+            taggedFilesCount = len(tagFinderDest.getTagEntryInDir(lastDir, recursive=False))
             if taggedFilesCount < maxFilesInDir:
                 tagEntry.move(lastDir)
                 break
             elif taggedFilesCount == maxFilesInDir:
                 tagEntry.move(lastDir)
                 sortFiles(sortTag, lastDir, destDir, maxFilesInDir,
-                          recursive=False, excludeDir=(lastDir,), tagFinder=tagFinder)
+                          recursive=False, excludeDir=(lastDir,),
+                          tagFinderDest=tagFinderDest, tagFinderSrc=tagFinderSrc)
                 break
 
         else:
