@@ -4,6 +4,7 @@ import os
 from PyQt5.QtWidgets import QWidget, QFileDialog, QVBoxLayout
 
 from pyqt_utils.metaclass.slot_decorator import SlotDecoratorMeta
+from pyqt_utils.python.decorators import cursorDec
 from pyqt_utils.widgets.base_widget import BaseWidget
 from tag_space_tools.core.file_sorter import sortFiles
 from tag_space_tools.gui.settings import settings, TagSpacePluginSettings
@@ -45,6 +46,7 @@ class TagSorter(Ui_TagSorter, BaseWidget, QWidget, metaclass=SlotDecoratorMeta):
     def _saveSortedTags(self):
         settings.SORTED_TAGS = self.listWidget.getAllTags()
 
+    @cursorDec
     def onLoadTagsButton(self):
         path, ext = QFileDialog.getOpenFileName(
             self, "Select tag library",
@@ -54,6 +56,7 @@ class TagSorter(Ui_TagSorter, BaseWidget, QWidget, metaclass=SlotDecoratorMeta):
         settings.SORT_FILE_LIBRARY = path
         self.listWidget.updateTags(loadTagLibrary(path))
 
+    @cursorDec
     def onSaveButtonClicked(self):
         savePath: str
         savePath, ext = QFileDialog.getSaveFileName(
@@ -69,6 +72,7 @@ class TagSorter(Ui_TagSorter, BaseWidget, QWidget, metaclass=SlotDecoratorMeta):
         self.listWidget.saveToFile(savePath)
 
     @staticmethod
+    @cursorDec
     def onMoveFilesClicked():
         fromPath = settings.UNSORTED_PATH
         toPath = settings.LIBRARY_PATH
@@ -77,12 +81,18 @@ class TagSorter(Ui_TagSorter, BaseWidget, QWidget, metaclass=SlotDecoratorMeta):
         sortFiles(sortTags, fromPath, toPath, maxFiles)
 
     @staticmethod
+    @cursorDec
     def onCleanEmptyFolders():
         libPath = settings.LIBRARY_PATH
-        for dirPath, dirNames, fileNames in os.walk(libPath):
-            if not dirNames and not fileNames:
-                logger.info(f"Removing {dirPath}")
-                try:
-                    os.rmdir(dirPath)
-                except OSError:
-                    logger.exception(f"Cannot remove {dirPath}")
+        changed = True
+        while changed:
+            changed = False
+
+            for dirPath, dirNames, fileNames in os.walk(libPath):
+                if not dirNames and not fileNames:
+                    logger.info(f"Removing {dirPath}")
+                    try:
+                        os.rmdir(dirPath)
+                        changed = True
+                    except OSError:
+                        logger.exception(f"Cannot remove {dirPath}")
