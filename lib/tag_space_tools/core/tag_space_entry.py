@@ -143,7 +143,7 @@ class TagSpaceEntry:
                 tags = {tagJson['title']: tagJson if edit else Tag.fromDict(tagJson)
                         for tagJson in configJson['tags']}
             except KeyError:
-                tags = []
+                tags = {}
             configJson['tags'] = tags
 
             yield configJson
