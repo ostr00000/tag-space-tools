@@ -67,7 +67,7 @@ def sortFiles(sortTag: list[Tag],
             if taggedFilesCount < maxFilesInDir:
                 tagEntry.move(lastDir)
                 break
-            elif taggedFilesCount == maxFilesInDir:
+            elif taggedFilesCount >= maxFilesInDir:
                 tagEntry.move(lastDir)
                 sortFiles(sortTag, lastDir, destDir, maxFilesInDir,
                           recursive=False, excludeDir=(lastDir,),
