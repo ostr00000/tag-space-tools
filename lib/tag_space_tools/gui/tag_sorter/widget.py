@@ -9,7 +9,7 @@ from pyqt_utils.widgets.base_widget import BaseWidget
 from tag_space_tools.core.file_sorter import sortFiles
 from tag_space_tools.gui.settings import settings, TagSpacePluginSettings
 from tag_space_tools.gui.tag_sorter.parser import loadTagLibrary
-from tag_space_tools.ui.ui_tag_sorter import Ui_TagSorter
+from tag_space_tools.ui.tag_sorter_ui import Ui_TagSorter
 
 logger = logging.getLogger(__name__)
 

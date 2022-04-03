@@ -7,7 +7,7 @@ from pyqt_settings.field.base import Field
 from pyqt_utils.widgets.base_widget import BaseWidget
 from tag_space_tools.core.tag_finder import TagFinder
 from tag_space_tools.gui.settings import TagSpacePluginSettings, settings
-from tag_space_tools.ui.ui_statistic_widget import Ui_StatisticWidget
+from tag_space_tools.ui.statistic_widget_ui import Ui_StatisticWidget
 
 
 class TagStatistics(Ui_StatisticWidget, BaseWidget, QWidget):

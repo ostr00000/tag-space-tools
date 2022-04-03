@@ -15,7 +15,7 @@ from tag_space_tools.core import tagSpaceCoreName
 from tag_space_tools.core.file_searcher import TagSpaceSearcher
 from tag_space_tools.gui.settings import settings, TagSpacePluginSettings
 from tag_space_tools.gui.tag_fixer.text_handler import TextEditHandler
-from tag_space_tools.ui.ui_fix_widget import Ui_TagSpaceFixWidget
+from tag_space_tools.ui.fix_widget_ui import Ui_TagSpaceFixWidget
 
 logger = logging.getLogger(__name__)
 

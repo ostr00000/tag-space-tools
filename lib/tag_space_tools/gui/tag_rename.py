@@ -6,7 +6,7 @@ from tag_space_tools.core import tagSpaceCoreName
 from tag_space_tools.core.tag_finder import TagFinder
 from tag_space_tools.gui.settings import settings, TagSpacePluginSettings
 from tag_space_tools.gui.tag_fixer.text_handler import TextEditHandler
-from tag_space_tools.ui.ui_tag_rename import Ui_TagRename
+from tag_space_tools.ui.tag_rename_ui import Ui_TagRename
 
 
 class TagRename(Ui_TagRename, BaseWidget, QWidget):

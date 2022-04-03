@@ -11,7 +11,7 @@ from tag_space_tools.core.find_duplicates import findDuplicates
 from tag_space_tools.gui.duplicate.dup_model import DupModel
 from tag_space_tools.gui.duplicate.selection_delegate import DarkerSelectionDelegate
 from tag_space_tools.gui.settings import settings, TagSpacePluginSettings
-from tag_space_tools.ui.ui_duplicate_widget import Ui_DuplicateWidget
+from tag_space_tools.ui.duplicate_widget_ui import Ui_DuplicateWidget
 
 logger = logging.getLogger(__name__)
 
