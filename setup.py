@@ -4,10 +4,11 @@ setup(
     name='tag-space-tools',
     version='0.2',
     python_requires='>=3.9',
-    description='Tool to fix tags for TagSpaces.',
+    description="Tool to fix tags for TagSpaces.",
 
     package_dir={'': 'lib'},
-    packages=find_packages(exclude=("*test*",)),
+    packages=find_packages(exclude=('*test*',)),
+    package_data={'': ['*.svg', '*.jpg']},
     entry_points={'console_scripts': [
         'tag-space-tools = tag_space_tools.gui.__main__:main']},
 
