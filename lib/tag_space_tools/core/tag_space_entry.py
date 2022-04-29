@@ -8,7 +8,7 @@ from dataclasses import dataclass, asdict
 from datetime import datetime
 from functools import cached_property
 from pathlib import Path
-from typing import Optional, List, TypedDict, Dict, ContextManager, TypeVar
+from typing import TypedDict, ContextManager, TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +58,7 @@ TagType = TypeVar('TagType', TagDict, Tag)
 
 
 class ConfigDict(TypedDict):
-    tags: Dict[str, TagType]
+    tags: dict[str, TagType]
     description: str
     color: str
     appVersionCreated: str
@@ -73,8 +73,8 @@ class TagSpaceEntry:
     TSM_FILE = 'tsm.json'
     TAG_SUFFIX = '.json'
 
-    file: Optional[Path] = None
-    configFile: Optional[Path] = None
+    file: Path | None = None
+    configFile: Path | None = None
 
     def __post_init__(self):
         if not self.configFile.exists():
@@ -85,7 +85,7 @@ class TagSpaceEntry:
                 and self.configFile is not None)
 
     @cached_property
-    def tags(self) -> List[Tag]:
+    def tags(self) -> list[Tag]:
         with self._configContext() as configJson:
             return list(configJson['tags'].values())
 

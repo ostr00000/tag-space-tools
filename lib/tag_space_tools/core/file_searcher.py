@@ -3,7 +3,6 @@ import shutil
 from collections import defaultdict
 from os import PathLike
 from pathlib import Path
-from typing import Dict, List
 
 from tag_space_tools.core.tag_space_entry import TagSpaceEntry
 
@@ -19,9 +18,9 @@ class TagSpaceSearcher:
         self.location = Path(location)
         self.recursive = recursive
 
-        self.missingTagFiles: Dict[str, List[TagSpaceEntry]] = defaultdict(list)
-        self.missingTagConfigs: Dict[str, List[TagSpaceEntry]] = defaultdict(list)
-        self.validTagEntries: List[TagSpaceEntry] = []
+        self.missingTagFiles: dict[str, list[TagSpaceEntry]] = defaultdict(list)
+        self.missingTagConfigs: dict[str, list[TagSpaceEntry]] = defaultdict(list)
+        self.validTagEntries: list[TagSpaceEntry] = []
 
         self._findTagSpace(self.location)
         self.missingTagFiles = dict(self.missingTagFiles)
@@ -61,7 +60,7 @@ class TagSpaceSearcher:
         try:
             if not location.exists():
                 return
-        except IOError as e:
+        except OSError as e:
             logger.exception(e)
             return
 

@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class TagSorter(Ui_TagSorter, BaseWidget, QWidget, metaclass=SlotDecoratorMeta):
     def __post_init__(self, *args, **kwargs):
-        super(TagSorter, self).__post_init__(*args, **kwargs)
+        super().__post_init__(*args, **kwargs)
 
         self.toPath = TagSpacePluginSettings.LIBRARY_PATH.createWidgetWithLabel(
             settings, self, layoutType=QVBoxLayout)

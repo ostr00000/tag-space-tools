@@ -5,7 +5,7 @@ import zlib
 from collections import defaultdict
 from pathlib import Path
 from pprint import pprint
-from typing import TypeVar, Callable, Iterable, Any, Union
+from typing import TypeVar, Callable, Iterable, Any
 
 import progressbar
 
@@ -75,7 +75,7 @@ def filterDuplicated(keyFun: Callable[[VAL], NEW_KEY],
 DUP_RESULT: TypeAlias = dict[Any, list[Path]]
 
 
-def findDuplicates(path: Union[os.PathLike, str],
+def findDuplicates(path: os.PathLike | str,
                    filterFunctions: Iterable[Callable[[Path], T]] = (getSize, getCrc)
                    ) -> DUP_RESULT:
     path = Path(path)

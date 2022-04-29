@@ -1,10 +1,7 @@
-from __future__ import annotations
-
 import logging
 import re
 from contextlib import contextmanager
 from itertools import takewhile
-from typing import Optional, Dict, List
 
 from PyQt5.QtCore import Qt, QSortFilterProxyModel
 from PyQt5.QtGui import QColor, QTextCursor, QStandardItemModel, QStandardItem
@@ -12,7 +9,7 @@ from PyQt5.QtWidgets import QTextEdit, QTreeView, QLineEdit
 
 
 @contextmanager
-def changeColor(textEdit: QTextEdit, color: Optional[QColor] = None):
+def changeColor(textEdit: QTextEdit, color: QColor | None = None):
     if color is None:
         yield
     else:
@@ -59,8 +56,8 @@ class TextEditHandler(logging.Handler):
         self.treeView.setHeaderHidden(True)
 
         self.topItem = None
-        self._groups: List[str] = []
-        self._prefix: Dict[str, QStandardItem] = {}
+        self._groups: list[str] = []
+        self._prefix: dict[str, QStandardItem] = {}
         self.reset()
 
     def reset(self):
@@ -110,7 +107,7 @@ class TextEditHandler(logging.Handler):
         return None
 
     def _getBiggestCommonPrefix(self, text):
-        keyToPrefix: Dict[str, int] = {
+        keyToPrefix: dict[str, int] = {
             group: sum(1 for _ in takewhile(lambda x: x[0] == x[1], zip(text, group)))
             for group in self._groups
         }

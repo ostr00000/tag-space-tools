@@ -1,7 +1,7 @@
 import logging
 from itertools import chain
 from pathlib import Path
-from typing import Iterator, Union, Container
+from typing import Iterator, Container
 
 import more_itertools
 
@@ -20,8 +20,8 @@ def _dirGen(sortTag: list[Tag], tags: list[Tag], destDir: Path) -> Iterator[Path
 
 
 def sortFiles(sortTag: list[Tag],
-              srcDir: Union[Path, str],
-              destDir: Union[Path, str],
+              srcDir: Path | str,
+              destDir: Path | str,
               maxFilesInDir=20,
               recursive=True,
               excludeDir: Container[Path] = (),

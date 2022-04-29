@@ -1,6 +1,6 @@
 from os import PathLike
 from pathlib import Path
-from typing import List, Iterable, Optional
+from typing import Iterable
 
 from tag_space_tools.core.file_searcher import TagSpaceSearcher
 from tag_space_tools.core.tag_space_entry import TagSpaceEntry
@@ -10,7 +10,7 @@ class TagFinder:
     def __init__(self, path: PathLike):
         self.tss = TagSpaceSearcher(path)
 
-    def findAllTags(self) -> List[str]:
+    def findAllTags(self) -> list[str]:
         tags = set()
         for vte in self.tss.validTagEntries:
             tags.update(vte.tags)
@@ -18,7 +18,7 @@ class TagFinder:
         return sorted(t.title for t in tags)
 
     def genFilesWithTag(self, tagName: str,
-                        extensions: Optional[list[str]] = None
+                        extensions: list[str] | None = None
                         ) -> Iterable[Path]:
         if extensions is not None:
             extensions = [e if e.startswith('.') else e + '.' for e in extensions]
