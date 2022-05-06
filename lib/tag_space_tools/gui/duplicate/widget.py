@@ -1,11 +1,14 @@
 import logging
 from pathlib import Path
+from shutil import which
 
-from PyQt5.QtCore import QItemSelectionModel
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtCore import QItemSelectionModel, Qt, QPoint
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QWidget, QMenu, QAction
 
 from pyqt_settings.field.base import Field
 from pyqt_utils.metaclass.geometry_saver import GeometrySaverMeta
+from pyqt_utils.python.process_async import runProcessAsync
 from pyqt_utils.widgets.base_widget import BaseWidget
 from tag_space_tools.core.find_duplicates import findDuplicates
 from tag_space_tools.gui.duplicate.dup_model import DupModel
@@ -29,10 +32,29 @@ class DuplicateWidget(Ui_DuplicateWidget, BaseWidget, QWidget,
         self.model = DupModel()
         self.tableView.setItemDelegate(DarkerSelectionDelegate(self))
         self.tableView.setModel(self.model)
+        self.tableView.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.tableView.customContextMenuRequested.connect(self.onCustomContextMenuRequested)
 
         self.findDuplicatesButton.clicked.connect(self.onFinDuplicatesClicked)
         self.selectCandidatesButton.clicked.connect(self.onSelectCandidates)
         self.removeSelectedButton.clicked.connect(self.onRemoveSelectionButton)
+
+    def onCustomContextMenuRequested(self, pos: QPoint):
+        showInFolder = QAction(QIcon.fromTheme('folder'), "Show in folder", self)
+
+        @showInFolder.triggered.connect
+        def onShowInFolderActionTriggered():
+            index = self.tableView.indexAt(pos)
+            path: Path = index.data(DupModel.PATH_ROLE)
+            if which('dolphin') is not None:
+                args = ['dolphin', '--select', str(path)]
+            else:
+                args = ['xdg-open', str(path.parent)]
+            runProcessAsync(args)
+
+        menu = QMenu(self)
+        menu.addAction(showInFolder)
+        menu.popup(self.tableView.viewport().mapToGlobal(pos))
 
     def onFinDuplicatesClicked(self):
         path = settings.LIBRARY_PATH
@@ -50,7 +72,6 @@ class DuplicateWidget(Ui_DuplicateWidget, BaseWidget, QWidget,
             selModel.select(index, QItemSelectionModel.Select | QItemSelectionModel.Rows)
 
     def onRemoveSelectionButton(self):
-
         for si in self.tableView.selectionModel().selectedRows():
             path: Path = si.data(DupModel.PATH_ROLE)
             try:

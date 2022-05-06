@@ -30,6 +30,17 @@ class DupModel(QAbstractTableModel):
                 res.append(a)
         return res
 
+    def headerData(self, section: int, orientation: Qt.Orientation, role: int = Qt.DisplayRole):
+        if not self._modelData:
+            return
+        if orientation != Qt.Horizontal or role != Qt.DisplayRole:
+            return
+
+        if section + 1 == len(self._modelData[0]):
+            return "Duplicated file path"
+        else:
+            return f"Stage {section}"
+
     def rowCount(self, parent: QModelIndex = None) -> int:
         return len(self._modelData)
 
@@ -40,7 +51,7 @@ class DupModel(QAbstractTableModel):
             return len(self._modelData[0])
 
     def data(self, index: QModelIndex, role: int = Qt.DisplayRole):
-        if role == Qt.DisplayRole:
+        if role == Qt.DisplayRole or role == Qt.ToolTipRole:
             val = self._modelData[index.row()][index.column()]
             return str(val)
 

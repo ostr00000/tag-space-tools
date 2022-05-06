@@ -40,15 +40,19 @@ def genFilesRec(path: Path):
 
 
 def progressBarIter(it: Iterable[T], totalSize: int) -> Iterable[T]:
-    bar = progressbar.ProgressBar(
-        maxval=totalSize,
-        widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()],
-    )
-    bar.start()
-    for i, val in enumerate(it):
-        yield val
-        bar.update(i + 1)
-    bar.finish()
+    try:
+        bar = progressbar.ProgressBar(
+            maxval=totalSize,
+            widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()],
+        )
+        bar.start()
+    except IOError:  # no stdout/stderr
+        yield from it
+    else:
+        for i, val in enumerate(it):
+            yield val
+            bar.update(i + 1)
+        bar.finish()
 
 
 NEW_KEY = TypeVar('NEW_KEY')
