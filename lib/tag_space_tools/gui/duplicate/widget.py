@@ -1,4 +1,5 @@
 import logging
+import shlex
 from pathlib import Path
 from shutil import which
 
@@ -48,9 +49,10 @@ class DuplicateWidget(Ui_DuplicateWidget, BaseWidget, QWidget,
             path: Path = index.data(DupModel.PATH_ROLE)
             if which('dolphin') is not None:
                 args = ['dolphin', '--select', str(path)]
+                runProcessAsync(shlex.join(args), shell=True)
             else:
                 args = ['xdg-open', str(path.parent)]
-            runProcessAsync(args)
+                runProcessAsync(args)
 
         menu = QMenu(self)
         menu.addAction(showInFolder)
