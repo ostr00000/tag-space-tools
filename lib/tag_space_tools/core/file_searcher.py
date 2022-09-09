@@ -1,9 +1,9 @@
 import logging
 import shutil
 from collections import defaultdict
-from os import PathLike
 from pathlib import Path
 
+from pyqt_utils.python.typing_const import StrPath
 from tag_space_tools.core.tag_space_entry import TagSpaceEntry
 
 logger = logging.getLogger(__name__)
@@ -14,7 +14,7 @@ class TagSpaceSearcher:
     Config files - special files from Tag Spaces located in TagSpaceEntry.TAG_DIR.
     """
 
-    def __init__(self, location: PathLike, recursive=True):
+    def __init__(self, location: StrPath, recursive=True):
         self.location = Path(location)
         self.recursive = recursive
 

@@ -1,5 +1,4 @@
 import logging
-import os
 import sys
 import zlib
 from collections import defaultdict
@@ -9,6 +8,7 @@ from typing import TypeVar, Callable, Iterable, Any
 
 import progressbar
 
+from pyqt_utils.python.typing_const import StrPath
 from tag_space_tools.core.tag_space_entry import TagSpaceEntry
 
 try:
@@ -79,7 +79,7 @@ def filterDuplicated(keyFun: Callable[[VAL], NEW_KEY],
 DUP_RESULT: TypeAlias = dict[Any, list[Path]]
 
 
-def findDuplicates(path: os.PathLike | str,
+def findDuplicates(path: StrPath,
                    filterFunctions: Iterable[Callable[[Path], T]] = (getSize, getCrc)
                    ) -> DUP_RESULT:
     path = Path(path)
