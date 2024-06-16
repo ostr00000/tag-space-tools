@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QWidget, QFileDialog, QVBoxLayout
 
 from pyqt_utils.metaclass.slot_decorator import SlotDecoratorMeta
 from pyqt_utils.python.decorators import cursorDec
-from pyqt_utils.widgets.base_widget import BaseWidget
+from pyqt_utils.widgets.base_ui_widget import BaseUiWidget
 from tag_space_tools.core.file_sorter import sortFiles
 from tag_space_tools.gui.settings import settings, TagSpacePluginSettings
 from tag_space_tools.gui.tag_sorter.parser import loadTagLibrary
@@ -14,7 +14,7 @@ from tag_space_tools.ui.tag_sorter_ui import Ui_TagSorter
 logger = logging.getLogger(__name__)
 
 
-class TagSorter(Ui_TagSorter, BaseWidget, QWidget, metaclass=SlotDecoratorMeta):
+class TagSorter(Ui_TagSorter, BaseUiWidget, QWidget, metaclass=SlotDecoratorMeta):
     def __post_init__(self, *args, **kwargs):
         super().__post_init__(*args, **kwargs)
 

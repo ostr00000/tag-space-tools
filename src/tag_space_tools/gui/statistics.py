@@ -4,13 +4,13 @@ from PyQt5.QtGui import QShowEvent
 from PyQt5.QtWidgets import QWidget, QTableWidgetItem
 
 from pyqt_settings.field.base import Field
-from pyqt_utils.widgets.base_widget import BaseWidget
+from pyqt_utils.widgets.base_ui_widget import BaseUiWidget
 from tag_space_tools.core.tag_finder import TagFinder
 from tag_space_tools.gui.settings import TagSpacePluginSettings, settings
 from tag_space_tools.ui.statistic_widget_ui import Ui_StatisticWidget
 
 
-class TagStatistics(Ui_StatisticWidget, BaseWidget, QWidget):
+class TagStatistics(Ui_StatisticWidget, BaseUiWidget, QWidget):
     class TableColumn(Enum):
         TAG_NAME = 0
         COUNT = 1

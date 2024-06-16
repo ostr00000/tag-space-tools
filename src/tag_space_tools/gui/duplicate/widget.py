@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QWidget, QMenu, QAction
 from pyqt_settings.field.base import Field
 from pyqt_utils.metaclass.geometry_saver import GeometrySaverMeta
 from pyqt_utils.python.process_async import runProcessAsync
-from pyqt_utils.widgets.base_widget import BaseWidget
+from pyqt_utils.widgets.base_ui_widget import BaseUiWidget
 from tag_space_tools.core.find_duplicates import findDuplicates
 from tag_space_tools.gui.duplicate.dup_model import DupModel
 from tag_space_tools.gui.duplicate.selection_delegate import DarkerSelectionDelegate
@@ -20,9 +20,12 @@ from tag_space_tools.ui.duplicate_widget_ui import Ui_DuplicateWidget
 logger = logging.getLogger(__name__)
 
 
-class DuplicateWidget(Ui_DuplicateWidget, BaseWidget, QWidget,
-                      metaclass=GeometrySaverMeta.wrap(QWidget),
-                      settings=settings):
+class DuplicateWidget(
+    Ui_DuplicateWidget,
+    BaseUiWidget,
+    metaclass=GeometrySaverMeta,
+    settings=settings,
+):
 
     def __post_init__(self, *args, **kwargs):
         super().__post_init__(*args, **kwargs)
@@ -34,7 +37,9 @@ class DuplicateWidget(Ui_DuplicateWidget, BaseWidget, QWidget,
         self.tableView.setItemDelegate(DarkerSelectionDelegate(self))
         self.tableView.setModel(self.model)
         self.tableView.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.tableView.customContextMenuRequested.connect(self.onCustomContextMenuRequested)
+        self.tableView.customContextMenuRequested.connect(
+            self.onCustomContextMenuRequested
+        )
 
         self.findDuplicatesButton.clicked.connect(self.onFinDuplicatesClicked)
         self.selectCandidatesButton.clicked.connect(self.onSelectCandidates)
@@ -71,7 +76,9 @@ class DuplicateWidget(Ui_DuplicateWidget, BaseWidget, QWidget,
         selModel = self.tableView.selectionModel()
         selModel.clearSelection()
         for index in self.model.genSelectionCandidates():
-            selModel.select(index, QItemSelectionModel.Select | QItemSelectionModel.Rows)
+            selModel.select(
+                index, QItemSelectionModel.Select | QItemSelectionModel.Rows
+            )
 
     def onRemoveSelectionButton(self):
         for si in self.tableView.selectionModel().selectedRows():

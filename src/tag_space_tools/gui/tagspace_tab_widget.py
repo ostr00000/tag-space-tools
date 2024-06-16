@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QTabWidget
 
 from pyqt_utils.metaclass.geometry_saver import GeometrySaverMeta
-from pyqt_utils.widgets.base_widget import BaseWidget
+from pyqt_utils.widgets.base_ui_widget import BaseWidget
 from tag_space_tools.gui.duplicate.widget import DuplicateWidget
 from tag_space_tools.gui.settings import settings
 from tag_space_tools.gui.statistics import TagStatistics
@@ -10,8 +10,9 @@ from tag_space_tools.gui.tag_rename import TagRename
 from tag_space_tools.gui.tag_sorter.widget import TagSorter
 
 
-class TagSpaceTabWidget(BaseWidget, QTabWidget, settings=settings,
-                        metaclass=GeometrySaverMeta.wrap(QTabWidget)):
+class TagSpaceTabWidget(
+    BaseWidget, QTabWidget, settings=settings, metaclass=GeometrySaverMeta
+):
 
     def __post_init__(self, *args, **kwargs):
         super().__post_init__(*args, **kwargs)

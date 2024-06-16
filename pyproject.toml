@@ -5,7 +5,7 @@ build-backend = 'setuptools.build_meta'
 [project]
 name = 'tag-space-tools'
 authors = [{ name = 'ostr00000' }]
-version = '0.3.0'
+version = '0.4.0'
 description = "Tool to fix tags for TagSpaces."
 
 requires-python = '>=3.8'
@@ -13,6 +13,8 @@ dependencies = [
     'PyQt5',
     'more_itertools',
     'progressbar2',
+    'ostr00000-utils @ git+https://github.com/ostr00000/ostr00000-utils@master#egg=pyqt-utils',
+    'pyqt-settings @ git+https://github.com/ostr00000/pyqt-settings@master#egg=pyqt-settings',
 ]
 
 [tool.setuptools.packages.find]

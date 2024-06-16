@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QFileDialog, QApplication, QWidget
 from pyqt_settings.field.base import Field
 from pyqt_utils.metaclass.slot_decorator import SlotDecoratorMeta
 from pyqt_utils.python.decorators import cursorDec
-from pyqt_utils.widgets.base_widget import BaseWidget
+from pyqt_utils.widgets.base_ui_widget import BaseUiWidget
 from tag_space_tools.core import tagSpaceCoreName
 from tag_space_tools.core.file_searcher import TagSpaceSearcher
 from tag_space_tools.gui.settings import settings, TagSpacePluginSettings
@@ -20,7 +20,7 @@ from tag_space_tools.ui.fix_widget_ui import Ui_TagSpaceFixWidget
 logger = logging.getLogger(__name__)
 
 
-class FixMissingTagWidget(Ui_TagSpaceFixWidget, BaseWidget, QWidget, metaclass=SlotDecoratorMeta):
+class FixMissingTagWidget(Ui_TagSpaceFixWidget, BaseUiWidget, metaclass=SlotDecoratorMeta):
 
     def __post_init__(self, *args, **kwargs):
         super().__post_init__(*args, **kwargs)

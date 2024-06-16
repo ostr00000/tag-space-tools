@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QWidget
 
 from pyqt_settings.field.base import Field
-from pyqt_utils.widgets.base_widget import BaseWidget
+from pyqt_utils.widgets.base_ui_widget import BaseUiWidget
 from tag_space_tools.core import tagSpaceCoreName
 from tag_space_tools.core.tag_finder import TagFinder
 from tag_space_tools.gui.settings import settings, TagSpacePluginSettings
@@ -9,7 +9,7 @@ from tag_space_tools.gui.tag_fixer.text_handler import TextEditHandler
 from tag_space_tools.ui.tag_rename_ui import Ui_TagRename
 
 
-class TagRename(Ui_TagRename, BaseWidget, QWidget):
+class TagRename(Ui_TagRename, BaseUiWidget, QWidget):
     def __post_init__(self, *args, **kwargs):
         super().__post_init__(*args, **kwargs)
         self.textHandler = TextEditHandler(self.textEdit, self.treeView, self.filterLineEdit)
