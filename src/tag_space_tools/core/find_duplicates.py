@@ -2,36 +2,29 @@ import logging
 import sys
 import zlib
 from collections import defaultdict
+from collections.abc import Callable, Iterable, Iterator
 from pathlib import Path
-from pprint import pprint
-from typing import TypeVar, Callable, Iterable, Any
+from pprint import pformat
+from typing import Any
 
 import progressbar
 
-from pyqt_utils.python.typing_const import StrPath
 from tag_space_tools.core.tag_space_entry import TagSpaceEntry
 
-try:
-    from typing import TypeAlias
-except ImportError:
-    TypeAlias = object
-
 logger = logging.getLogger(__name__)
-T = TypeVar('T')
 
 
-def getSize(path: Path):
+def getSize(path: Path) -> int:
     return path.stat().st_size
 
 
-def getCrc(path: Path):
-    with open(path, 'rb') as file:
+def getCrc(path: Path) -> int:
+    with path.open('rb') as file:
         content = file.read(1024)
-    checksum = zlib.crc32(content)
-    return checksum
+    return zlib.crc32(content)
 
 
-def genFilesRec(path: Path):
+def genFilesRec(path: Path) -> Iterable[Path]:
     for file in path.iterdir():
         if file.is_file():
             yield file
@@ -39,14 +32,14 @@ def genFilesRec(path: Path):
             yield from genFilesRec(file)
 
 
-def progressBarIter(it: Iterable[T], totalSize: int) -> Iterable[T]:
+def progressBarIter[T](it: Iterable[T], totalSize: int) -> Iterable[T]:
     try:
         bar = progressbar.ProgressBar(
             maxval=totalSize,
             widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()],
         )
         bar.start()
-    except IOError:  # no stdout/stderr
+    except OSError:  # no stdout/stderr
         yield from it
     else:
         for i, val in enumerate(it):
@@ -55,43 +48,51 @@ def progressBarIter(it: Iterable[T], totalSize: int) -> Iterable[T]:
         bar.finish()
 
 
-NEW_KEY = TypeVar('NEW_KEY')
-OLD_KEY = TypeVar('OLD_KEY')
-VAL = TypeVar('VAL')
-
-
-def nestedDictSize(dic: dict[T, list]):
+def nestedDictSize(dic: dict[Any, list]) -> int:
     return sum(len(val) for val in dic.values())
 
 
-def filterDuplicated(keyFun: Callable[[VAL], NEW_KEY],
-                     dup: dict[OLD_KEY, list[VAL]]
-                     ) -> dict[tuple[OLD_KEY, NEW_KEY], list[VAL]]:
-    keyToValues = defaultdict(list)
-    totalSize = nestedDictSize(dup)
-    for oldKey, values in progressBarIter(dup.items(), totalSize=totalSize):
-        for v in values:
-            keyToValues[oldKey, keyFun(v)].append(v)
-
-    return {k: val for k, val in keyToValues.items() if len(val) >= 2}
+type _LevelKey = tuple[int, ...]
+type _LevelMap[P] = dict[_LevelKey, list[P]]
 
 
-DUP_RESULT: TypeAlias = dict[Any, list[Path]]
+class DupAggregator[P]:
+    def __init__(self, allObjects: list[P]):
+        self.allObjects = allObjects
+        logger.debug(f'Filter stage 0: {len(allObjects)}')
+
+        level0: _LevelMap = {(0,): self.allObjects}
+        self.levels: list[_LevelMap[P]] = [level0]
+
+    def addLevel(self, keyFun: Callable[[P], int]):
+        lastLevel = self.levels[-1]
+        totalSize = nestedDictSize(lastLevel)
+        keyToValues: _LevelMap[P] = defaultdict(list)
+
+        for k, values in progressBarIter(lastLevel.items(), totalSize=totalSize):
+            for v in values:
+                keyToValues[*k, keyFun(v)].append(v)
+
+        dupKeyToVal = {k: val for k, val in keyToValues.items() if len(val) > 1}
+        self.levels.append(dupKeyToVal)
+        logger.debug(f'Filter stage {self.levels}: {nestedDictSize(dupKeyToVal)}')
+
+    def getAllLevels(self) -> Iterator[list[str]]:
+        for level in self.levels:
+            ret: list[str] = list(map(str, level.keys()))
+            ret.extend(map(str, level.values()))
+            yield ret
 
 
-def findDuplicates(path: StrPath,
-                   filterFunctions: Iterable[Callable[[Path], T]] = (getSize, getCrc)
-                   ) -> DUP_RESULT:
-    path = Path(path)
-    dup = {None: list(genFilesRec(path))}
-    logger.debug(f'Filter stage 0: {nestedDictSize(dup)}')
+class PathDupAggregator(DupAggregator[Path]):
+    def __init__(self, pathLike: str | Path):
+        allObjects = list(genFilesRec(Path(pathLike)))
+        super().__init__(allObjects)
 
-    for stageNum, filterFun in enumerate(filterFunctions):
-        dup = filterDuplicated(filterFun, dup)
-        logger.debug(f'Filter stage {stageNum}: {nestedDictSize(dup)}')
-
-    return dup
+        self.addLevel(getSize)
+        self.addLevel(getCrc)
 
 
 if __name__ == '__main__':
-    pprint(findDuplicates(sys.argv[1]))
+    logging.basicConfig(level=logging.DEBUG)
+    logger.debug(pformat(PathDupAggregator(sys.argv[1]).levels))

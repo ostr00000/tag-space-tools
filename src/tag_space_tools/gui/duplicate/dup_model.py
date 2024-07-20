@@ -1,75 +1,84 @@
-from typing import Iterable
+from collections.abc import Iterable
 
 from PyQt5.QtCore import QAbstractTableModel, QModelIndex, Qt
-from PyQt5.QtGui import QColor, QBrush
+from PyQt5.QtGui import QBrush, QColor
+from pyqt_utils.python.late_init import LateInit
 
-from tag_space_tools.core.find_duplicates import DUP_RESULT
+from tag_space_tools.core.find_duplicates import PathDupAggregator
+
+_topLevelIndex = QModelIndex()
 
 
 class DupModel(QAbstractTableModel):
     PATH_ROLE = Qt.UserRole
 
+    rawData = LateInit[PathDupAggregator]()
+
     def __init__(self):
         super().__init__()
-        self._modelData: list[tuple] = []
-        self._rawData: DUP_RESULT = {}
+        self._modelData: list[list[str]] = []
 
-    def setDupResult(self, dupResult: DUP_RESULT):
+    def setDupResult(self, dupResult: PathDupAggregator):
         self.beginResetModel()
-        self._modelData = [self.flatTuple(k, v) for k, values in dupResult.items() for v in values]
-        self._rawData = dupResult
+        self.rawData = dupResult
+        self._modelData = list(dupResult.getAllLevels())
         self.endResetModel()
 
     @classmethod
-    def flatTuple(cls, *args) -> list:
-        res = []
+    def flatList[T](cls, *args: T | Iterable[T]) -> list[T]:
+        res: list[T] = []
         for a in args:
             if isinstance(a, Iterable):
-                res.extend(cls.flatTuple(*a))
+                b: Iterable[T] = a
+                res.extend(cls.flatList(*b))
             else:
                 res.append(a)
         return res
 
-    def headerData(self, section: int, orientation: Qt.Orientation, role: int = Qt.DisplayRole):
+    def headerData(
+        self, section: int, orientation: Qt.Orientation, role: int = Qt.DisplayRole
+    ):
         if not self._modelData:
-            return
+            return None
         if orientation != Qt.Horizontal or role != Qt.DisplayRole:
-            return
+            return None
 
         if section + 1 == len(self._modelData[0]):
             return "Duplicated file path"
-        else:
-            return f"Stage {section}"
 
-    def rowCount(self, parent: QModelIndex = None) -> int:
+        return f"Stage {section}"
+
+    def rowCount(self, parent: QModelIndex = _topLevelIndex) -> int:
         return len(self._modelData)
 
-    def columnCount(self, parent: QModelIndex = None) -> int:
+    def columnCount(self, parent: QModelIndex = _topLevelIndex) -> int:
         if not self._modelData:
             return 0
-        else:
-            return len(self._modelData[0])
+
+        return len(self._modelData[0])
 
     def data(self, index: QModelIndex, role: int = Qt.DisplayRole):
-        if role == Qt.DisplayRole or role == Qt.ToolTipRole:
+        if role in (Qt.DisplayRole, Qt.ToolTipRole):
             val = self._modelData[index.row()][index.column()]
             return str(val)
 
-        elif role == Qt.BackgroundRole:
+        if role == Qt.BackgroundRole:
             h = hash(tuple(self._modelData[index.row()][:-1]))
             color = QColor((h * 21) % 255, (h * 213) % 255, (h * 2137) % 255)
             return QBrush(color)
 
-        elif role == Qt.TextAlignmentRole:
+        if role == Qt.TextAlignmentRole:
             if index.column() == self.columnCount() - 1:
                 return Qt.AlignRight
+            return None
 
-        elif role == self.PATH_ROLE:
+        if role == self.PATH_ROLE:
             return self._modelData[index.row()][-1]
+        return None
 
     def genSelectionCandidates(self) -> Iterable[QModelIndex]:
         row = 0
-        for values in self._rawData.values():
+        for values in self.rawData.getAllLevels():
             locSel = []
             for v in values:
                 if 'sort' in str(v):

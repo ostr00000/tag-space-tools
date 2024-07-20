@@ -1,21 +1,26 @@
 import logging
-import shlex
-from pathlib import Path
 from shutil import which
+from typing import TYPE_CHECKING
 
-from PyQt5.QtCore import QItemSelectionModel, Qt, QPoint
+from PyQt5.QtCore import QItemSelectionModel, QPoint, Qt
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QWidget, QMenu, QAction
-
-from pyqt_settings.field.base import Field
+from PyQt5.QtWidgets import QAction, QMenu
 from pyqt_utils.metaclass.geometry_saver import GeometrySaverMeta
 from pyqt_utils.python.process_async import runProcessAsync
 from pyqt_utils.widgets.base_ui_widget import BaseUiWidget
-from tag_space_tools.core.find_duplicates import findDuplicates
+
+from tag_space_tools.core.find_duplicates import (
+    PathDupAggregator,
+)
 from tag_space_tools.gui.duplicate.dup_model import DupModel
 from tag_space_tools.gui.duplicate.selection_delegate import DarkerSelectionDelegate
-from tag_space_tools.gui.settings import settings, TagSpacePluginSettings
+from tag_space_tools.gui.settings import TagSpacePluginSettings, tsSettings
 from tag_space_tools.ui.duplicate_widget_ui import Ui_DuplicateWidget
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from pyqt_settings.field.base import Field
 
 logger = logging.getLogger(__name__)
 
@@ -24,13 +29,13 @@ class DuplicateWidget(
     Ui_DuplicateWidget,
     BaseUiWidget,
     metaclass=GeometrySaverMeta,
-    settings=settings,
+    settings=tsSettings,
 ):
 
     def __post_init__(self, *args, **kwargs):
         super().__post_init__(*args, **kwargs)
         field: Field = TagSpacePluginSettings.LIBRARY_PATH
-        self.libraryWidget = field.createWidgetWithLabel(settings)
+        self.libraryWidget = field.createWidgetWithLabel(tsSettings)
         self.libraryWidget.replaceWidget(self.pathPlaceholder)
 
         self.model = DupModel()
@@ -54,22 +59,21 @@ class DuplicateWidget(
             path: Path = index.data(DupModel.PATH_ROLE)
             if which('dolphin') is not None:
                 args = ['dolphin', '--select', str(path)]
-                runProcessAsync(shlex.join(args), shell=True)
             else:
                 args = ['xdg-open', str(path.parent)]
-                runProcessAsync(args)
+            runProcessAsync(args)
 
         menu = QMenu(self)
         menu.addAction(showInFolder)
         menu.popup(self.tableView.viewport().mapToGlobal(pos))
 
     def onFinDuplicatesClicked(self):
-        path = settings.LIBRARY_PATH
-        if not path:
+        pathLike = tsSettings.LIBRARY_PATH
+        if not pathLike:
             return
 
-        dup = findDuplicates(path)
-        self.model.setDupResult(dup)
+        pda = PathDupAggregator(pathLike)
+        self.model.setDupResult(pda)
         self.selectCandidatesButton.clicked.emit()
 
     def onSelectCandidates(self):
@@ -85,8 +89,9 @@ class DuplicateWidget(
             path: Path = si.data(DupModel.PATH_ROLE)
             try:
                 path.unlink()
+            except OSError:
+                logger.exception("Error removing file")
+            else:
                 logger.info(f"Removing file: {path}")
-            except OSError as e:
-                logger.exception(e)
 
         self.findDuplicatesButton.clicked.emit()

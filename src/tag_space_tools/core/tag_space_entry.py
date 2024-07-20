@@ -3,12 +3,13 @@ import itertools
 import json
 import logging
 import shutil
+from collections.abc import Iterator
 from contextlib import contextmanager
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from functools import cached_property
 from pathlib import Path
-from typing import TypedDict, ContextManager, TypeVar
+from typing import Literal, TypedDict, overload
 
 logger = logging.getLogger(__name__)
 
@@ -23,22 +24,32 @@ class Tag:
     @classmethod
     def fromDict(cls, env):
         param = inspect.signature(cls).parameters
-        tag = cls(**{
-            k: v for k, v in env.items()
-            if k in param})
-        return tag
+        return cls(**{k: v for k, v in env.items() if k in param})
 
     def __eq__(self, other):
         if isinstance(other, str):
             return other == self.title
 
         if not isinstance(other, Tag):
-            raise NotImplemented
+            return NotImplemented
 
         return self.title == other.title
 
     def __hash__(self):
         return hash(self.title)
+
+
+class TagsSerializer(list[Tag]):
+    """Class used for serialization and deserialization of `Tag` class."""
+
+    @classmethod
+    def deserialize(cls, tagText: str) -> list[Tag]:
+        tags = json.loads(tagText)
+        return [Tag.fromDict(t) for t in tags]
+
+    @classmethod
+    def serialize(cls, sortedTags: list[Tag]) -> str:
+        return json.dumps([asdict(t) for t in sortedTags])
 
 
 class TagDict(TypedDict):
@@ -54,10 +65,8 @@ class TagDict(TypedDict):
     modified_date: str
 
 
-TagType = TypeVar('TagType', TagDict, Tag)
-
-
-class ConfigDict(TypedDict):
+class ConfigDict[TagType: (TagDict, Tag)](TypedDict):
+    # `tags` value may be a python wrapper or raw dict
     tags: dict[str, TagType]
     description: str
     color: str
@@ -77,12 +86,25 @@ class TagSpaceEntry:
     configFile: Path | None = None
 
     def __post_init__(self):
-        if not self.configFile.exists():
+        if self.configFile is not None and not self.configFile.exists():
             self.configFile = None
 
+    @property
+    def requireFile(self) -> Path:
+        if self.file is None:
+            msg = f"No file for {self}"
+            raise ValueError(msg)
+        return self.file
+
+    @property
+    def requireConfigFile(self) -> Path:
+        if self.configFile is None:
+            msg = f"No config file for {self}"
+            raise ValueError(msg)
+        return self.configFile
+
     def isValid(self):
-        return (self.file is not None
-                and self.configFile is not None)
+        return self.file is not None and self.configFile is not None
 
     @cached_property
     def tags(self) -> list[Tag]:
@@ -96,8 +118,10 @@ class TagSpaceEntry:
 
         with self._configContext(edit=True) as configJson:
             changingTag = configJson['tags'].get(fromTagName, {})
-            logger.info(f"Rename tag:'{changingTag['title']}' to '{toTagName}' "
-                        f"for file '{self.file.name}'")
+            logger.info(
+                f"Rename tag:'{changingTag['title']}' to '{toTagName}' "
+                f"for file '{self.requireFile.name}'"
+            )
             changingTag['title'] = toTagName
             changingTag['modified_date'] = datetime.now().astimezone().isoformat()
 
@@ -134,21 +158,35 @@ class TagSpaceEntry:
         self.tags.append(tag)
         return True
 
+    @overload
     @contextmanager
-    def _configContext(self, edit=False) -> ContextManager[ConfigDict]:
+    def _configContext(
+        self, *, edit: Literal[True]
+    ) -> Iterator[ConfigDict[TagDict]]: ...
+
+    @overload
+    @contextmanager
+    def _configContext(
+        self, *, edit: Literal[False] = False
+    ) -> Iterator[ConfigDict[Tag]]: ...
+
+    @contextmanager
+    def _configContext(self, *, edit=False) -> Iterator[ConfigDict]:
         mode = 'r+' if edit else 'r'
-        with open(self.configFile, mode, encoding='utf-8-sig') as cf:
+        with self.requireConfigFile.open(mode, encoding='utf-8-sig') as cf:
             configJson = json.load(cf)
             try:
-                tags = {tagJson['title']: tagJson if edit else Tag.fromDict(tagJson)
-                        for tagJson in configJson['tags']}
+                tags = {
+                    tagJson['title']: tagJson if edit else Tag.fromDict(tagJson)
+                    for tagJson in configJson['tags']
+                }
             except KeyError:
                 tags = {}
             configJson['tags'] = tags
 
             yield configJson
             if edit:
-                configJson['tags'] = [t for t in configJson['tags'].values()]
+                configJson['tags'] = list(configJson['tags'].values())
                 configJson['lastUpdated'] = datetime.now().astimezone().isoformat()
                 cf.seek(0)
                 json.dump(configJson, cf)
@@ -156,34 +194,34 @@ class TagSpaceEntry:
 
     def move(self, destDir: Path):
         """Move file with its meta file to *destDir*."""
-        destFile = None
-
         if self.file is not None:
             destDir.mkdir(exist_ok=True, parents=True)
-            destFile = destDir / self.file.name
-            destFile = generateUniqueFile(destFile)
+            destFilePath = generateUniqueFile(destDir / self.requireFile.name)
 
-            logger.debug(f"Moving {self.file} to {destFile}")
-            shutil.move(self.file, destFile)
-            self.file = destFile
+            logger.debug(f"Moving {self.requireFile} to {destFilePath}")
+            shutil.move(self.requireFile, destFilePath)
+            self.file = destFilePath
 
         if self.configFile is not None:
             metaDir = destDir / self.TAG_DIR
             metaDir.mkdir(exist_ok=True, parents=True)
 
-            if destFile is not None:
-                destFile = metaDir / (destFile.name + self.TAG_SUFFIX)
+            if self.file is not None:
+                fileName = self.requireFile.name + self.TAG_SUFFIX
             else:
-                destFile = metaDir / self.configFile.name
+                fileName = self.requireConfigFile.name
+            configDestFile = metaDir / fileName
 
-            logger.debug(f"Moving {self.configFile} to {destFile}")
-            shutil.move(self.configFile, destFile)
-            self.configFile = destFile
+            logger.debug(f"Moving {self.requireConfigFile} to {configDestFile}")
+            shutil.move(self.requireConfigFile, configDestFile)
+            self.configFile = configDestFile
 
 
-def generateUniqueFile(file: Path):
+def generateUniqueFile(file: Path) -> Path:
     baseStem = file.stem
     for i in itertools.count(start=1):
         if not file.exists():
             return file
         file = file.with_stem(f'{baseStem}_{i}')
+
+    raise ValueError

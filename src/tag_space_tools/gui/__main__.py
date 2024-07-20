@@ -1,6 +1,6 @@
 import logging
 
-from tag_space_tools import packageName, appName, appDisplayName, orgName
+from tag_space_tools import appDisplayName, appName, orgName, packageName
 
 
 def prepareLoggers():
@@ -11,6 +11,7 @@ def prepareLoggers():
 
 def main():
     from PyQt5.QtWidgets import QApplication
+
     from tag_space_tools.gui.tagspace_tab_widget import TagSpaceTabWidget
 
     app = QApplication([])

@@ -1,13 +1,14 @@
 import logging
 import os
+from pathlib import Path
 
-from PyQt5.QtWidgets import QWidget, QFileDialog, QVBoxLayout
-
+from PyQt5.QtWidgets import QFileDialog, QVBoxLayout, QWidget
 from pyqt_utils.metaclass.slot_decorator import SlotDecoratorMeta
-from pyqt_utils.python.decorators import cursorDec
+from pyqt_utils.python.decorators import cursorDecFactory
 from pyqt_utils.widgets.base_ui_widget import BaseUiWidget
+
 from tag_space_tools.core.file_sorter import sortFiles
-from tag_space_tools.gui.settings import settings, TagSpacePluginSettings
+from tag_space_tools.gui.settings import TagSpacePluginSettings, tsSettings
 from tag_space_tools.gui.tag_sorter.parser import loadTagLibrary
 from tag_space_tools.ui.tag_sorter_ui import Ui_TagSorter
 
@@ -19,80 +20,92 @@ class TagSorter(Ui_TagSorter, BaseUiWidget, QWidget, metaclass=SlotDecoratorMeta
         super().__post_init__(*args, **kwargs)
 
         self.toPath = TagSpacePluginSettings.LIBRARY_PATH.createWidgetWithLabel(
-            settings, self, layoutType=QVBoxLayout)
+            tsSettings, self, layoutType=QVBoxLayout
+        )
         self.toPath.replaceWidget(self.toFolderPlaceholder)
 
         self.fromPath = TagSpacePluginSettings.UNSORTED_PATH.createWidgetWithLabel(
-            settings, self, layoutType=QVBoxLayout)
+            tsSettings, self, layoutType=QVBoxLayout
+        )
         self.fromPath.replaceWidget(self.fromFolderPlaceholder)
 
-        self.maxFiles = TagSpacePluginSettings.MAX_FILES_PER_LEVEL. \
-            createWidgetWithLabel(settings, self, layoutType=QVBoxLayout)
+        self.maxFiles = (
+            TagSpacePluginSettings.MAX_FILES_PER_LEVEL.createWidgetWithLabel(
+                tsSettings, self, layoutType=QVBoxLayout
+            )
+        )
         self.maxFiles.replaceWidget(self.maxFilesPlaceholder)
 
         self.loadTagsButton.clicked.connect(self.onLoadTagsButton)
         self.removeTagButton.clicked.connect(self.listWidget.removeSelected)
-        self.listWidget.dataChanged.connect(self.onDataChanged)
+        self.listWidget.dataChangedSig.connect(self.onDataChanged)
         self.saveButton.clicked.connect(self.onSaveButtonClicked)
         self.moveFilesButton.clicked.connect(self.onMoveFilesClicked)
         self.emptyFolderCleanButton.clicked.connect(self.onCleanEmptyFolders)
 
-        if sortedTags := settings.SORTED_TAGS:
+        if sortedTags := tsSettings.SORTED_TAGS:
             self.listWidget.addItems(sortedTags)
 
     def onDataChanged(self):
         self._saveSortedTags()
 
     def _saveSortedTags(self):
-        settings.SORTED_TAGS = self.listWidget.getAllTags()
+        tsSettings.SORTED_TAGS = self.listWidget.getAllTags()
 
-    @cursorDec
+    @cursorDecFactory()
     def onLoadTagsButton(self):
         path, ext = QFileDialog.getOpenFileName(
-            self, "Select tag library",
-            directory=settings.LAST_SAVE_FILE, filter='*.json')
+            self,
+            "Select tag library",
+            directory=tsSettings.LAST_SAVE_FILE,
+            filter='*.json',
+        )
         if not path:
             return
-        settings.SORT_FILE_LIBRARY = path
+        tsSettings.SORT_FILE_LIBRARY = path
         self.listWidget.updateTags(loadTagLibrary(path))
 
-    @cursorDec
+    @cursorDecFactory()
     def onSaveButtonClicked(self):
-        savePath: str
         savePath, ext = QFileDialog.getSaveFileName(
-            parent=self, caption="Select save location",
-            directory=settings.LAST_SAVE_FILE, filter='*.json')
+            parent=self,
+            caption="Select save location",
+            directory=tsSettings.LAST_SAVE_FILE,
+            filter='*.json',
+        )
         if not savePath:
             return
 
         if not savePath.endswith('.json'):
             savePath += '.json'
 
-        settings.LAST_SAVE_FILE = savePath
+        tsSettings.LAST_SAVE_FILE = savePath
         self.listWidget.saveToFile(savePath)
 
     @staticmethod
-    @cursorDec
+    @cursorDecFactory()
     def onMoveFilesClicked():
-        fromPath = settings.UNSORTED_PATH
-        toPath = settings.LIBRARY_PATH
-        sortTags = settings.SORTED_TAGS
-        maxFiles = settings.MAX_FILES_PER_LEVEL
+        fromPath = tsSettings.UNSORTED_PATH
+        toPath = tsSettings.LIBRARY_PATH
+        sortTags = tsSettings.SORTED_TAGS
+        maxFiles = tsSettings.MAX_FILES_PER_LEVEL
         sortFiles(sortTags, fromPath, toPath, maxFiles)
 
     @staticmethod
-    @cursorDec
+    @cursorDecFactory()
     def onCleanEmptyFolders():
-        libPath = settings.LIBRARY_PATH
+        libPath = tsSettings.LIBRARY_PATH
         changed = True
         while changed:
             changed = False
 
             for dirPath, dirNames, fileNames in os.walk(libPath):
-                if not dirNames and not fileNames:
-                    logger.info(f"Removing {dirPath}")
-                    try:
-                        os.rmdir(dirPath)
-                        changed = True
-                    except OSError:
-                        logger.exception(f"Cannot remove {dirPath}")
+                if dirNames or fileNames:
+                    continue
+
+                logger.info(f"Removing {dirPath}")
+                try:
+                    Path(dirPath).rmdir()
+                    changed = True
+                except OSError:
+                    logger.exception(f"Cannot remove {dirPath}")

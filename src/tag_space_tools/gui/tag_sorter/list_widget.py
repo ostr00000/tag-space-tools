@@ -1,10 +1,10 @@
 import json
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QColor, QDropEvent
-from PyQt5.QtWidgets import QListWidgetItem, QListWidget
+from PyQt5.QtWidgets import QListWidget, QListWidgetItem
 
 from tag_space_tools.core.tag_space_entry import Tag
 
@@ -21,20 +21,20 @@ class TagItem(QListWidgetItem):
         if color.startswith('#'):
             colorRgb = color[:7]
             return QColor(colorRgb)
-        else:
-            return QColor(color)
+        return QColor(color)
 
 
 class TagListWidget(QListWidget):
-    dataChanged = pyqtSignal()
+    dataChangedSig = pyqtSignal()
 
     def updateTags(self, newTags: Iterable[Tag]):
-        """Remove existing tags that are not in newTag
-        and add tags that are not yet in existing tags."""
+        """Remove existing tags that are not in `newTag` and set `newTags`."""
         newTags = list(newTags)
         for i in reversed(range(self.count())):
             item = self.item(i)
-            assert isinstance(item, TagItem)
+            if not isinstance(item, TagItem):
+                raise TypeError
+
             try:
                 newTags.remove(item.tag)
             except ValueError:
@@ -45,30 +45,31 @@ class TagListWidget(QListWidget):
     def addItems(self, tags: Iterable[Tag]):
         for t in tags:
             self.addItem(TagItem(t))
-        self.dataChanged.emit()
+        self.dataChangedSig.emit()
 
     def removeSelected(self):
         for item in reversed(self.selectedItems()):
             row = self.row(item)
             self.takeItem(row)
-        self.dataChanged.emit()
+        self.dataChangedSig.emit()
 
     def getAllTags(self) -> list[Tag]:
         sortTags = []
         for i in range(self.count()):
             item = self.item(i)
-            assert isinstance(item, TagItem)
+            if not isinstance(item, TagItem):
+                raise TypeError
             sortTags.append(item.tag)
         return sortTags
 
-    def saveToFile(self, savePath):
-        Path(savePath).parent.mkdir(parents=True, exist_ok=True)
-        with open(savePath, 'w') as saveFile:
-            serialized = json.dumps(
-                self.getAllTags(), default=lambda x: x.__dict__)
+    def saveToFile(self, savePath: str | Path):
+        sp = Path(savePath)
+        sp.parent.mkdir(parents=True, exist_ok=True)
+        with sp.open('w') as saveFile:
+            serialized = json.dumps(self.getAllTags(), default=lambda x: x.__dict__)
             saveFile.write(serialized)
 
     def dropEvent(self, event: QDropEvent):
         super().dropEvent(event)
         if event.isAccepted():
-            self.dataChanged.emit()
+            self.dataChangedSig.emit()

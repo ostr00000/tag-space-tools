@@ -2,14 +2,15 @@ import logging
 import re
 from contextlib import contextmanager
 from itertools import takewhile
+from typing import ClassVar
 
-from PyQt5.QtCore import Qt, QSortFilterProxyModel
-from PyQt5.QtGui import QColor, QTextCursor, QStandardItemModel, QStandardItem
-from PyQt5.QtWidgets import QTextEdit, QTreeView, QLineEdit
+from PyQt5.QtCore import QSortFilterProxyModel, Qt
+from PyQt5.QtGui import QColor, QStandardItem, QStandardItemModel, QTextCursor
+from PyQt5.QtWidgets import QLineEdit, QTextEdit, QTreeView
 
 
 @contextmanager
-def changeColor(textEdit: QTextEdit, color: QColor | None = None):
+def changeColor(textEdit: QTextEdit, color: QColor | Qt.GlobalColor | None = None):
     if color is None:
         yield
     else:
@@ -20,7 +21,7 @@ def changeColor(textEdit: QTextEdit, color: QColor | None = None):
 
 
 class TextEditHandler(logging.Handler):
-    colorMap = {
+    colorMap: ClassVar[dict[int, Qt.GlobalColor]] = {
         logging.DEBUG: Qt.gray,
         logging.INFO: Qt.green,
         logging.WARNING: Qt.darkYellow,
@@ -38,7 +39,12 @@ class TextEditHandler(logging.Handler):
         yield
         tagLogger.removeHandler(self)
 
-    def __init__(self, textEdit: QTextEdit, treeView: QTreeView, filterLineEdit: QLineEdit = None):
+    def __init__(
+        self,
+        textEdit: QTextEdit,
+        treeView: QTreeView,
+        filterLineEdit: QLineEdit | None = None,
+    ):
         super().__init__()
         self.treeView = treeView
         self.textEdit = textEdit
@@ -55,14 +61,13 @@ class TextEditHandler(logging.Handler):
             self.filterLineEdit.textChanged.connect(self.filterModel.setFilterRegExp)
         self.treeView.setHeaderHidden(True)
 
-        self.topItem = None
+        self.topItem = QStandardItem('Top Item')
         self._groups: list[str] = []
         self._prefix: dict[str, QStandardItem] = {}
         self.reset()
 
     def reset(self):
         self.model.clear()
-        self.topItem = QStandardItem('Top Item')
         self.model.setItem(0, 0, self.topItem)
         self._groups.clear()
         self._prefix.clear()
@@ -74,7 +79,7 @@ class TextEditHandler(logging.Handler):
         self.addGroup(msg)
         self.treeView.expandToDepth(0)
 
-    def addText(self, text: str, color: QColor = None):
+    def addText(self, text: str, color: QColor | Qt.GlobalColor | None = None):
         with changeColor(self.textEdit, color):
             self.textEdit.insertPlainText(text + '\n')
             self.textEdit.moveCursor(QTextCursor.End)
@@ -87,8 +92,7 @@ class TextEditHandler(logging.Handler):
         if existingItem := self._findItemWithExistingPrefix(validPrefix):
             parentItem = existingItem
 
-        elif biggestPrefix := self._getBiggestCommonPrefix(validPrefix):
-            assert biggestPrefix is not None
+        elif (biggestPrefix := self._getBiggestCommonPrefix(validPrefix)) is not None:
             item, biggestPrefixText, prefixSize = biggestPrefix
 
             parentItem = self._addPrefix(validPrefix, prefixSize)
@@ -100,19 +104,21 @@ class TextEditHandler(logging.Handler):
         parentItem.appendRow(item)
 
     def _findItemWithExistingPrefix(self, text: str):
-        for prefix, item in self._prefix.items():
+        for item in self._prefix.values():
             if item.text().startswith(text):
                 return item
 
         return None
 
-    def _getBiggestCommonPrefix(self, text):
+    def _getBiggestCommonPrefix(
+        self, text: str
+    ) -> tuple[QStandardItem, str, int] | None:
         keyToPrefix: dict[str, int] = {
-            group: sum(1 for _ in takewhile(lambda x: x[0] == x[1], zip(text, group)))
-            for group in self._groups
+            group: self._prefixSize(text, group) for group in self._groups
         }
-        if not (biggestPrefix := max(keyToPrefix, key=keyToPrefix.get, default=None)):
-            return
+        biggestPrefix = max(keyToPrefix, key=keyToPrefix.__getitem__, default='')
+        if not biggestPrefix:
+            return None
 
         for i in range(self.topItem.rowCount()):
             prefixItem = self.topItem.child(i, 0)
@@ -120,6 +126,12 @@ class TextEditHandler(logging.Handler):
                 return prefixItem, biggestPrefix, keyToPrefix[biggestPrefix]
 
         return None
+
+    @staticmethod
+    def _prefixSize(t1: str, t2: str) -> int:
+        return sum(
+            1 for _ in takewhile(lambda x: x[0] == x[1], zip(t1, t2, strict=False))
+        )
 
     def _addPrefix(self, text, size=None):
         if size is None:
@@ -134,6 +146,8 @@ class TextEditHandler(logging.Handler):
     def _moveItems(self, newItem: QStandardItem, prefix: str):
         for i in reversed(range(self.topItem.rowCount())):
             child = self.topItem.child(i, 0)
-            if child.text().startswith(prefix):
-                self.topItem.takeChild(i, 0)
-                newItem.appendRow(child)
+            if not child.text().startswith(prefix):
+                continue
+
+            self.topItem.takeChild(i, 0)
+            newItem.appendRow(child)
