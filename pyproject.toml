@@ -14,8 +14,8 @@ dependencies = [
     'PyQt5',
     'more_itertools',
     'progressbar2',
-    'ostr00000-utils @ git+https://github.com/ostr00000/ostr00000-utils@master#egg=pyqt-utils',
-    'pyqt-settings @ git+https://github.com/ostr00000/pyqt-settings@master#egg=pyqt-settings',
+    'ostr00000-utils @ git+https://github.com/ostr00000/ostr00000-utils@master',
+    'pyqt-settings @ git+https://github.com/ostr00000/pyqt-settings@master',
 ]
 # END_SKIP_AREA
 authors = [{name = 'ostr00000'}]
@@ -51,7 +51,7 @@ PYSIDE6 = false
 # https://docs.astral.sh/ruff/configuration/
 target-version = "py312"
 unsafe-fixes = true
-namespace-packages = ["src/manager/actions"] # START_SKIP_AREA END_SKIP_AREA
+namespace-packages = ["src/manager/actions"]  # START_SKIP_AREA END_SKIP_AREA
 
 [tool.ruff.lint]
 select = [
