@@ -5,8 +5,10 @@ from tag_space_tools.gui.tagspace_tab_widget import TagSpaceTabWidget
 
 
 class PluginTagSpaceTools(DisplayWidgetAction[TagSpaceTabWidget]):
+    sortOrder = 240
+
     def __init__(self, parent):
-        icon = QIcon.fromTheme('tagspaces')
+        icon = QIcon.fromTheme('tag_space_tools:tag_spaces_logo.png')
         super().__init__(icon=icon, text='Tag Space Tools', parent=parent)
 
     def createWidget(self, parent: QWidget | None = None) -> TagSpaceTabWidget:
