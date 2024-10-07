@@ -111,7 +111,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QToolButton" name="colapseButton">
+          <widget class="QToolButton" name="collapseButton">
            <property name="text">
             <string>|&gt;&lt;|</string>
            </property>
@@ -157,7 +157,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>colapseButton</sender>
+   <sender>collapseButton</sender>
    <signal>clicked()</signal>
    <receiver>treeView</receiver>
    <slot>collapseAll()</slot>
