@@ -17,7 +17,7 @@ repos:
       - id: identity
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v4.6.0
     hooks:
       - id: check-added-large-files
         args: [ '--maxkb=500' ]
@@ -41,19 +41,22 @@ repos:
       - id: shellcheck
 
   - repo: https://github.com/abravalheri/validate-pyproject
-    rev: v0.23
+    rev: v0.18
     hooks:
       - id: validate-pyproject
 
   - repo: https://github.com/pappasam/toml-sort
-    rev: v0.24.2
+    rev: v0.23.1
     hooks:
       - id: toml-sort-fix
         args:
           - --trailing-comma-inline-array
 
-  - repo: https://github.com/crate-ci/typos
-    rev: dictgen-v0.3.1
+  - repo: https://github.com/adhtruong/mirrors-typos
+    # original repo: https://github.com/crate-ci/typos
+    # we use mirror repo, because tags in original repo are broken:
+    # https://github.com/crate-ci/typos/issues/390
+    rev: v1.31.0
     hooks:
       - id: typos
         name: typos-diff
@@ -69,7 +72,7 @@ repos:
         additional_dependencies: [ tomli ]
 
   - repo: https://github.com/executablebooks/mdformat
-    rev: 0.7.21
+    rev: 0.7.17
     hooks:
       - id: mdformat
         additional_dependencies:
@@ -88,7 +91,7 @@ repos:
         args: [ --line-length=89 ]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.6
+    rev: v0.4.9
     hooks:
       - id: ruff
         name: ruff-diff
@@ -103,17 +106,17 @@ repos:
         args: [ --exit-non-zero-on-fix, --fix, --statistics]
 
   - repo: https://github.com/psf/black
-    rev: 24.10.0
+    rev: 24.4.2
     hooks:
       - id: black
 
   - repo: https://github.com/jendrikseipp/vulture
-    rev: v2.14
+    rev: v2.11
     hooks:
       - id: vulture
 
   - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.391
+    rev: v1.1.372
     hooks:
       - id: pyright
         verbose: true

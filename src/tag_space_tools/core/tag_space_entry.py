@@ -137,7 +137,7 @@ class TagSpaceEntry:
             return False
 
         with self._configContext(edit=True) as configJson:
-            removingTag: dict = configJson['tags'].get(removeTagName, {})
+            removingTag: TagDict | dict = configJson['tags'].get(removeTagName, {})
             removingTag.pop('title', None)
 
         for t in self.tags:
