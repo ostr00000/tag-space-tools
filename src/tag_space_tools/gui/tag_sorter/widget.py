@@ -54,7 +54,7 @@ class TagSorter(Ui_TagSorter, BaseUiWidget, QWidget, metaclass=SlotDecoratorMeta
 
     @cursorDecFactory()
     def onLoadTagsButton(self):
-        path, ext = QFileDialog.getOpenFileName(
+        path, _ext = QFileDialog.getOpenFileName(
             self,
             "Select tag library",
             directory=tsSettings.LAST_SAVE_FILE,
@@ -67,7 +67,7 @@ class TagSorter(Ui_TagSorter, BaseUiWidget, QWidget, metaclass=SlotDecoratorMeta
 
     @cursorDecFactory()
     def onSaveButtonClicked(self):
-        savePath, ext = QFileDialog.getSaveFileName(
+        savePath, _ext = QFileDialog.getSaveFileName(
             parent=self,
             caption="Select save location",
             directory=tsSettings.LAST_SAVE_FILE,

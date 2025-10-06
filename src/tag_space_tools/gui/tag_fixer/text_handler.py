@@ -93,7 +93,7 @@ class TextEditHandler(logging.Handler):
             parentItem = existingItem
 
         elif (biggestPrefix := self._getBiggestCommonPrefix(validPrefix)) is not None:
-            item, biggestPrefixText, prefixSize = biggestPrefix
+            item, _biggestPrefixText, prefixSize = biggestPrefix
 
             parentItem = self._addPrefix(validPrefix, prefixSize)
             self._moveItems(parentItem, validPrefix)
