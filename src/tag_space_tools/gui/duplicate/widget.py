@@ -61,7 +61,7 @@ class DuplicateWidget(
                 args = ['dolphin', '--select', str(path)]
             else:
                 args = ['xdg-open', str(path.parent)]
-            runProcessAsync(args)
+            runProcessAsync(args, shell=False)
 
         menu = QMenu(self)
         menu.addAction(showInFolder)
